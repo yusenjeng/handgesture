@@ -1424,6 +1424,26 @@
   dependencies:
     rimraf "^3.0.2"
 
+"@tensorflow/tfjs-backend-cpu@2.3.0", "@tensorflow/tfjs-backend-cpu@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-backend-cpu/-/tfjs-backend-cpu-2.3.0.tgz#31176038bfeb321a49a2b30bedbdb6c239025f95"
+  integrity sha512-Ycf8mZywZYJrRIcZBqrloDxBc/lmV6aLLfj18wo8WE4aX9UxLNmSXF2iSs+x8icx7YmvLLglvTVST6tzL4sUSg==
+  dependencies:
+    "@types/seedrandom" "2.4.27"
+    seedrandom "2.4.3"
+
+"@tensorflow/tfjs-backend-webgl@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-backend-webgl/-/tfjs-backend-webgl-2.3.0.tgz#74ebd6a07a1fcc0f706f07cbf66c85ea01620a24"
+  integrity sha512-xTwAAASFPNHpIyShynCc+4Z2JtruJvEUosV28TDCNv9ZNuarxxpGimTBohjKFqzcjGIi4II0NyXbjMxTJcJkqw==
+  dependencies:
+    "@tensorflow/tfjs-backend-cpu" "2.3.0"
+    "@types/offscreencanvas" "~2019.3.0"
+    "@types/seedrandom" "2.4.27"
+    "@types/webgl-ext" "0.0.30"
+    "@types/webgl2" "0.0.4"
+    seedrandom "2.4.3"
+
 "@tensorflow/tfjs-converter@^2.3.0":
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/@tensorflow/tfjs-converter/-/tfjs-converter-2.3.0.tgz#359a8cbb5da78c7aefcf5045b4db3754d9846965"
