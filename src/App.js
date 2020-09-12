@@ -1,101 +1,92 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import * as handtrack from '@tensorflow-models/handpose';
-import * as tf from '@tensorflow/tfjs-core';
 import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
+import * as tf from '@tensorflow/tfjs';
+import './App.css';
 
-let model;
-let iterator = 0;
+window.model = null;
+window.iterator = 0;
+window.fps = 0;
+window.prevTime = 0;
 
 function App() {
-  const localVideo = useRef(null);
+  const localVideoRef = useRef(null);
+  const canvasRef = useRef(null)
+  const [uiFPS, setUiFPS] = useState(0);
 
-  useEffect(()=>{
-    async function setup(){
+  /**
+   * Setup model and cam video
+   */
+  useEffect(() => {
+    async function setup() {
       await tf.setBackend('webgl');
 
       const startLoadTime = new Date().getTime();
-      model = await handtrack.load();
+      window.model = await handtrack.load();
       console.log("ML model loaded. Elapsed time: ", new Date().getTime() - startLoadTime);
-      
-      const stream = await navigator.mediaDevices.getUserMedia({video:true});
+
+      const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
       console.log("Get user media success!", stream);
 
       // for react
-      localVideo.current.srcObject = stream;
-
-      // for ML model, has to be HTMLVideoElement
-      let videoElem = document.createElement("video");
-      videoElem.srcObject = stream;
-
-      return new Promise((resolve) => {
-        videoElem.onloadedmetadata = () => {
-          resolve(videoElem);
-        };
-      });
+      localVideoRef.current.srcObject = stream;
+      localVideoRef.current.play();
     }
 
-    async function main() {
-      const localVideoElem = await setup();
-      localVideoElem.play();
-      console.log("Loaded data, start computing...");
+    setup();
+  }, []);
 
-      // TODO: now only use hardcoded interval
-      setInterval(
-        async () => {await computeHandpose(localVideoElem)}, 
-        2000
-      );
-    }
+  /**
+   * Setup Canvas and Prediction
+   */
+  useEffect(()=>{
+    const video = localVideoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
 
-    const computeHandpose = async function(videoElem) {
-      const predictions = await model.estimateHands(videoElem);
-      console.log("Iteration: ", iterator++, ", predictions length: ", predictions.length);
+    // Assign css size to be screen size
+    canvas.width = canvas.clientWidth;
+    canvas.height= canvas.clientHeight;
+
+    const computeHandpose = async function(target) {
+      const predictions = await window.model.estimateHands(target);
       if (predictions.length > 0) {
-        /*
-        `predictions` is an array of objects describing each detected hand, for example:
-        [
-          {
-            handInViewConfidence: 1, // The probability of a hand being present.
-            boundingBox: { // The bounding box surrounding the hand.
-              topLeft: [162.91, -17.42],
-              bottomRight: [548.56, 368.23],
-            },
-            landmarks: [ // The 3D coordinates of each hand landmark.
-              [472.52, 298.59, 0.00],
-              [412.80, 315.64, -6.18],
-              ...
-            ],
-            annotations: { // Semantic groupings of the `landmarks` coordinates.
-              thumb: [
-                [412.80, 315.64, -6.18]
-                [350.02, 298.38, -7.14],
-                ...
-              ],
-              ...
-            }
-          }
-        ]
-        */
-
-        for (let i = 0; i < predictions.length; i++) {
-          const keypoints = predictions[i].landmarks;
-
-          // Log hand keypoints.
-          for (let i = 0; i < keypoints.length; i++) {
-            const [x, y, z] = keypoints[i];
-            console.log(`Keypoint ${i}: [${x}, ${y}, ${z}]`);
-          }
-        }
+        console.log("Iteration: ", window.iterator++, ", predictions: ", predictions);
       }
     }
-    
-    main();
+
+    async function draw(tm) {
+      if(video.paused || video.ended) return false;
+
+      // FPS calculation
+      const dt = tm - window.prevTime;
+      window.prevTime = tm;
+      window.fps = window.fps * 0.85 + (1000/dt) * 0.15;
+      setUiFPS(window.fps.toFixed(2));
+
+      // Hand prediction
+      await computeHandpose(canvas);
+
+      // Draw video to canvas
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      window.requestAnimationFrame(draw);
+    }
+
+    video.addEventListener('play', function() {
+      window.requestAnimationFrame(draw);
+      console.log('Ready', canvas.width, canvas.height, video.paused , video.ended)
+    });
+
   }, []);
 
   return (
     <div className="App">
-      yes we can
-      <video autoPlay ref={localVideo}></video>
+      <video autoPlay ref={localVideoRef} />
+      <canvas ref={canvasRef} />
+      <div>
+        Average FPS: {uiFPS}
+      </div>
     </div>
   );
 }
