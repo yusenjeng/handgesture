@@ -10,6 +10,15 @@ window.iterator = 0;
 window.fps = 0;
 window.prevTime = 0;
 
+// look up indices for predictions[0].landmarks
+window.fingerIndices = {
+  thumb: [0, 1, 2, 3, 4],
+  indexFinger: [0, 5, 6, 7, 8],
+  middleFinger: [0, 9, 10, 11, 12],
+  ringFinger: [0, 13, 14, 15, 16],
+  pinky: [0, 17, 18, 19, 20]
+};
+
 function App() {
   const localVideoRef = useRef(null);
   const canvasRef = useRef(null)
@@ -44,6 +53,9 @@ function App() {
     const video = localVideoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    ctx.strokeStyle = 'red';
+    ctx.fillStyle = 'red';
 
     // Assign css size to be screen size
     canvas.width = canvas.clientWidth;
@@ -51,8 +63,33 @@ function App() {
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
-      if (predictions.length > 0) {
-        console.log("Iteration: ", window.iterator++, ", predictions: ", predictions);
+      
+      return predictions;
+    }
+
+    const drawPrediction = function(predictedPoints) {
+      // draw points
+      for (let i = 0; i < predictedPoints.length; i++) {
+        const y = predictedPoints[i][0];
+        const x = predictedPoints[i][1];
+        ctx.beginPath();
+        ctx.arc(y, x, 3, 0, 2 * Math.PI);
+        ctx.fill();
+      }
+
+      // draw lines
+      const fingers = Object.keys(window.fingerIndices);
+      for (let i = 0; i < fingers.length; i++) {
+        const fingerPoints = window.fingerIndices[fingers[i]].map(idx => predictedPoints[idx]);
+
+        // draw line for each finger (5 points)
+        const region = new Path2D();
+        region.moveTo(fingerPoints[0][0], fingerPoints[0][1]); // move to base point
+        for (let j = 1; j < fingerPoints.length; j++) {
+          region.lineTo(fingerPoints[j][0], fingerPoints[j][1]);
+        }
+
+        ctx.stroke(region);
       }
     }
 
@@ -65,11 +102,18 @@ function App() {
       window.fps = window.fps * 0.85 + (1000/dt) * 0.15;
       setUiFPS(window.fps.toFixed(2));
 
-      // Hand prediction
-      await computeHandpose(canvas);
-
       // Draw video to canvas
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // Hand prediction
+      const predictions = await computeHandpose(canvas);
+
+      if (predictions.length > 0) {
+        console.log("Iteration: ", window.iterator++, ", predictions: ", predictions);
+        const result = predictions[0].landmarks;
+        drawPrediction(result);
+      }
+
       window.requestAnimationFrame(draw);
     }
 
