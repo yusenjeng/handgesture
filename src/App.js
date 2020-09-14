@@ -10,14 +10,8 @@ window.iterator = 0;
 window.fps = 0;
 window.prevTime = 0;
 
-// look up indices for predictions[0].landmarks
-window.fingerIndices = {
-  thumb: [0, 1, 2, 3, 4],
-  indexFinger: [0, 5, 6, 7, 8],
-  middleFinger: [0, 9, 10, 11, 12],
-  ringFinger: [0, 13, 14, 15, 16],
-  pinky: [0, 17, 18, 19, 20]
-};
+window.fingers = ['thumb', 'indexFinger', 'middleFinger', 'ringFinger', 'pinky'];
+window.FINGER_LANDMARK_POINTS = 4;
 
 function App() {
   const localVideoRef = useRef(null);
@@ -78,15 +72,15 @@ function App() {
       }
 
       // draw lines
-      const fingers = Object.keys(window.fingerIndices);
-      for (let i = 0; i < fingers.length; i++) {
-        const fingerPoints = window.fingerIndices[fingers[i]].map(idx => predictedPoints[idx]);
-
-        // draw line for each finger (5 points)
+      for (let i = 0; i < window.fingers.length; i++) {
         const region = new Path2D();
-        region.moveTo(fingerPoints[0][0], fingerPoints[0][1]); // move to base point
-        for (let j = 1; j < fingerPoints.length; j++) {
-          region.lineTo(fingerPoints[j][0], fingerPoints[j][1]);
+        const basePoint = predictedPoints[0];
+        region.moveTo(basePoint[0], basePoint[1]);
+
+        // draw line of 4 landmark points for each finger
+        for (let j = 1; j <= window.FINGER_LANDMARK_POINTS; j++) {
+          region.lineTo(predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][0], 
+                        predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][1]);
         }
 
         ctx.stroke(region);
@@ -107,11 +101,9 @@ function App() {
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
-
       if (predictions.length > 0) {
         console.log("Iteration: ", window.iterator++, ", predictions: ", predictions);
-        const result = predictions[0].landmarks;
-        drawPrediction(result);
+        drawPrediction(predictions[0].landmarks);
       }
 
       window.requestAnimationFrame(draw);
