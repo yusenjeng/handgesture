@@ -4,6 +4,7 @@ import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
+import logo from './cisco-logo.png'
 
 window.model = null;
 window.iterator = 0;
@@ -17,6 +18,8 @@ function App() {
   const localVideoRef = useRef(null);
   const canvasRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
+  const canvasWidth = 640;
+  const canvasHeight = 360;
 
   /**
    * Setup model and cam video
@@ -29,7 +32,8 @@ function App() {
       window.model = await handtrack.load();
       console.log("ML model loaded. Elapsed time: ", new Date().getTime() - startLoadTime);
 
-      const stream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
+      const constraints = {audio: false, video: {width: canvasWidth, height: canvasHeight}};
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Get user media success!", stream);
 
       // for react
@@ -47,22 +51,23 @@ function App() {
     const video = localVideoRef.current;
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
+    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
     ctx.strokeStyle = 'red';
     ctx.fillStyle = 'red';
 
     // Assign css size to be screen size
-    canvas.width = canvas.clientWidth;
-    canvas.height= canvas.clientHeight;
+    canvas.width = canvasWidth;
+    canvas.height= canvasHeight;
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
-      
+
       return predictions;
     }
 
     const drawPrediction = function(predictedPoints) {
       // draw points
+      ctx.fillStyle = "white";
       for (let i = 0; i < predictedPoints.length; i++) {
         const y = predictedPoints[i][0];
         const x = predictedPoints[i][1];
@@ -72,6 +77,7 @@ function App() {
       }
 
       // draw lines
+      ctx.strokeStyle = "white";
       for (let i = 0; i < window.fingers.length; i++) {
         const region = new Path2D();
         const basePoint = predictedPoints[0];
@@ -79,7 +85,7 @@ function App() {
 
         // draw line of 4 landmark points for each finger
         for (let j = 1; j <= window.FINGER_LANDMARK_POINTS; j++) {
-          region.lineTo(predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][0], 
+          region.lineTo(predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][0],
                         predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][1]);
         }
 
@@ -97,7 +103,7 @@ function App() {
       setUiFPS(window.fps.toFixed(2));
 
       // Draw video to canvas
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
@@ -118,11 +124,35 @@ function App() {
 
   return (
     <div className="App">
-      <video autoPlay ref={localVideoRef} />
-      <canvas ref={canvasRef} />
-      <div>
-        Average FPS: {uiFPS}
+
+      <div className="app-header">
+        <h1><img className="cisco-logo" src={logo} />Cisco Webex GestureUI Demo</h1>
       </div>
+
+      <div>
+        <table>
+          <tr>
+            <th>User View</th>
+            <th>Computer Vision View</th>
+          </tr>
+          <tr>
+            <td><video autoPlay ref={localVideoRef} /></td>
+            <td><canvas ref={canvasRef} /></td>
+          </tr>
+        </table>
+      </div>
+
+      <div>
+        <div className="inline-block">
+          <strong>Statistics</strong><br />
+          <span>Average FPS: {uiFPS}</span>
+        </div>
+        <div className="inline-block">
+          <strong>Predicted Gesture</strong><br />
+          <div className="predicted-gesture"></div>
+        </div>
+      </div>
+
     </div>
   );
 }

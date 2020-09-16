@@ -1,6 +1,41 @@
-canvas{
-  /* width: 100px;
-  height: 75px; */
-  width: 600px;
-  height: 400px;
+.App {
+  font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
+  font-weight: 300;
+}
+
+canvas {
+  width: 640px;
+  height: 360px;
+  filter: grayscale(100%);
+}
+
+video {
+  width: 640px;
+  height: 360px;
+}
+
+.app-header {
+  background-color: #049Fd9;
+  color: white;
+  padding: 1px;
+  margin-bottom: 20px;
+}
+
+.cisco-logo {
+  height: 24px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.inline-block {
+  display: inline-block;
+  padding-top: 20px;
+  vertical-align: top;
+  width: 200px
+}
+
+.predicted-gesture {
+  border: 2px solid black;
+  width: 150px;
+  height: 150px;
 }
