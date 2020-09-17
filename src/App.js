@@ -18,6 +18,8 @@ function App() {
   const localVideoRef = useRef(null);
   const canvasRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
+  const [thumbOpen, setThumbOpen] = useState(false);
+  const [thumbUp, setThumbUp] = useState(false);
   const canvasWidth = 640;
   const canvasHeight = 360;
 
@@ -108,8 +110,39 @@ function App() {
       // Hand prediction
       const predictions = await computeHandpose(canvas);
       if (predictions.length > 0) {
-        console.log("Iteration: ", window.iterator++, ", predictions: ", predictions);
+        
         drawPrediction(predictions[0].landmarks);
+
+        // refer to this pic (this is left hand, right hand is similar): https://gist.github.com/TheJLifeX/74958cc59db477a91837244ff598ef4a#file-02-landmarks-jpg
+        const landmarks = predictions[0].landmarks;
+
+        // right hand, palm facing the screen
+        if (landmarks[3][0] < landmarks[2][0] && 
+            landmarks[4][0] < landmarks[2][0]) {
+            console.log("Iteration: ", window.iterator++, 
+                      ", landmarks 2 3 4: ", 
+                      landmarks[2],
+                      landmarks[3],
+                      landmarks[4]);
+            setThumbOpen(false);
+        } else {
+          setThumbOpen(true);
+        }
+
+        if (landmarks[3][1] < landmarks[2][1] && 
+            landmarks[4][1] < landmarks[2][1] &&
+            landmarks[3][1] < landmarks[8][1] &&
+            landmarks[4][1] < landmarks[6][1]) {
+            console.log("Iteration: ", window.iterator++, 
+                    ", landmarks 2 3 4 8: ", 
+                    landmarks[2],
+                    landmarks[3],
+                    landmarks[4],
+                    landmarks[8]);
+            setThumbUp(true);
+        } else {
+          setThumbUp(false);
+        }
       }
 
       window.requestAnimationFrame(draw);
@@ -149,7 +182,12 @@ function App() {
         </div>
         <div className="inline-block">
           <strong>Predicted Gesture</strong><br />
-          <div className="predicted-gesture"></div>
+          <div className="predicted-gesture">
+            {`Thumb is open: ${thumbOpen}`}
+          </div>
+          <div className="predicted-gesture">
+            {`Thumb is up: ${thumbUp}`}
+          </div>
         </div>
       </div>
 
