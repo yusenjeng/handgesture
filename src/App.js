@@ -20,6 +20,7 @@ function App() {
   const [uiFPS, setUiFPS] = useState(0);
   const [thumbOpen, setThumbOpen] = useState(false);
   const [thumbUp, setThumbUp] = useState(false);
+  const [firstOpen, setFirstOpen] = useState(false);
   const canvasWidth = 640;
   const canvasHeight = 360;
 
@@ -116,9 +117,11 @@ function App() {
         // refer to this pic (this is left hand, right hand is similar): https://gist.github.com/TheJLifeX/74958cc59db477a91837244ff598ef4a#file-02-landmarks-jpg
         const landmarks = predictions[0].landmarks;
 
+        // TODO: add both x axis and y axis check
         // right hand, palm facing the screen
-        if (landmarks[3][0] < landmarks[2][0] && 
-            landmarks[4][0] < landmarks[2][0]) {
+        if (landmarks[4][0] < landmarks[3][0] && 
+            landmarks[4][0] < landmarks[2][0] &&
+            landmarks[4][0] < landmarks[1][0]) {
             console.log("Iteration: ", window.iterator++, 
                       ", landmarks 2 3 4: ", 
                       landmarks[2],
@@ -127,6 +130,14 @@ function App() {
             setThumbOpen(false);
         } else {
           setThumbOpen(true);
+        }
+
+        if (landmarks[8][1] < landmarks[7][1] &&
+          landmarks[8][1] < landmarks[6][1] &&
+          landmarks[8][1] < landmarks[5][1]) {
+          setFirstOpen(true);
+        } else {
+          setFirstOpen(false);
         }
 
         if (landmarks[3][1] < landmarks[2][1] && 
@@ -183,10 +194,9 @@ function App() {
         <div className="inline-block">
           <strong>Predicted Gesture</strong><br />
           <div className="predicted-gesture">
-            {`Thumb is open: ${thumbOpen}`}
-          </div>
-          <div className="predicted-gesture">
-            {`Thumb is up: ${thumbUp}`}
+            <div>{`Thumb is open: ${thumbOpen}`}</div>
+            <div>{`Thumb is up: ${thumbUp}`}</div>
+            <div>{`First is open: ${firstOpen}`}</div>
           </div>
         </div>
       </div>
