@@ -37,7 +37,7 @@ const straight = (angel) => {
   return angel > 100;
 }
 const straightThumb = (angel) => {
-  return angel > 150;  // my thumb is fat and short, so sad
+  return angel > 130;  // my thumb is fat and short, so sad
 }
 
 /**
@@ -47,11 +47,14 @@ const isThumbOpen = (landmarks) => {
   const d4 = D2(landmarks[4], landmarks[0]);
   const d3 = D2(landmarks[3], landmarks[0]);
 
+  const d46 = D2(landmarks[4], landmarks[6]);
+  const isFist = d46 < 60;
+
   const angel1 = angel(landmarks[4], landmarks[3], landmarks[2], landmarks[3]);
   const angel2 = angel(landmarks[3], landmarks[2], landmarks[1], landmarks[2]);
   const angel3 = angel(landmarks[2], landmarks[1], landmarks[0], landmarks[1]);
   const isStraight = straightThumb(angel1) && straightThumb(angel2) && straightThumb(angel3);
-  return larger(d4, d3) || isStraight ;
+  return !isFist && (larger(d4, d3) || isStraight);
 };
 
 const isFirstOpen = (landmarks) => {
@@ -100,11 +103,13 @@ const isFourthOpen = (landmarks) => {
 };
 
 const isThumbUp = (landmarks) => {
-  return landmarks[3][1] < landmarks[2][1];
+  const d = landmarks[3][1] - landmarks[1][1];
+  return d < -50 ;
 };
 
 const isThumbDown = (landmarks) => {
-  return landmarks[3][1] > landmarks[2][1];
+  const d = landmarks[3][1] - landmarks[1][1];
+  return d > 0;
 };
 
 
@@ -281,12 +286,10 @@ function App() {
           <strong>Statistics</strong><br />
           <span>Average FPS: {uiFPS}</span>
         </div>
+
         <div className="inline-block-sm">
-          <strong>Predicted Gesture</strong><br />
+          <strong>Predicted Fingers</strong><br />
           <div className="predicted-gesture">
-            <div>{`Pose ThumbUp: ${poseThumbUp}`}</div>
-            <div>{`Pose ThumbDown: ${poseThumbDown}`}</div>
-            <hr></hr>
             <div>{`Thumb is up: ${thumbUp}`}</div>
             <div>{`Thumb is down: ${thumbDown}`}</div>
             <hr></hr>
@@ -295,6 +298,15 @@ function App() {
             <div>{`2nd is open: ${secondOpen}`}</div>
             <div>{`3rd is open: ${thirdOpen}`}</div>
             <div>{`4th is open: ${fourthOpen}`}</div>
+          </div>
+        </div>
+
+        <div className="inline-block-sm">
+          <strong>Predicted Poses</strong><br />
+          <div className="predicted-gesture">
+            <div>{`Pose ThumbUp: ${poseThumbUp}`}</div>
+            <div>{`Pose ThumbDown: ${poseThumbDown}`}</div>
+
           </div>
         </div>
       </div>
