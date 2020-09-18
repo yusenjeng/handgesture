@@ -240,6 +240,14 @@ function App() {
         setFourthOpen(isFourthOpen(landmarks));
         setThumbUp(isThumbUp(landmarks));
         setThumbDown(isThumbDown(landmarks));
+      }else{
+        setThumbOpen(false);
+        setFirstOpen(false);
+        setSecondOpen(false);
+        setThirdOpen(false);
+        setFourthOpen(false);
+        setThumbUp(false);
+        setThumbDown(false);
       }
 
       window.requestAnimationFrame(draw);
