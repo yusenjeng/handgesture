@@ -14,14 +14,118 @@ window.prevTime = 0;
 window.fingers = ['thumb', 'indexFinger', 'middleFinger', 'ringFinger', 'pinky'];
 window.FINGER_LANDMARK_POINTS = 4;
 
+/**
+ * geometric functions
+ */
+const D2 = (v1, v2) => {
+  return Math.sqrt((v1[0] - v2[0]) ** 2 + (v1[1] - v2[1]) ** 2).toFixed(1);
+}
+const larger = (d1, d2) => {
+  return d1 - d2 > 30;
+}
+const angel = (A1, A2, B1, B2) => {
+  var dAx = A2[0] - A1[0];
+  var dAy = A2[1] - A1[1];
+  var dBx = B2[0] - B1[0];
+  var dBy = B2[1] - B1[1];
+  var angle = Math.atan2(dAx * dBy - dAy * dBx, dAx * dBx + dAy * dBy);
+  if(angle < 0) {angle = angle * -1;}
+  var degree_angle = angle * (180 / Math.PI);
+  return Math.floor(degree_angle);
+}
+const straight = (angel) => {
+  return angel > 100;
+}
+const straightThumb = (angel) => {
+  return angel > 150;  // my thumb is fat and short, so sad
+}
+
+/**
+ * Helper functions
+ */
+const isThumbOpen = (landmarks) => {
+  const d4 = D2(landmarks[4], landmarks[0]);
+  const d3 = D2(landmarks[3], landmarks[0]);
+
+  const angel1 = angel(landmarks[4], landmarks[3], landmarks[2], landmarks[3]);
+  const angel2 = angel(landmarks[3], landmarks[2], landmarks[1], landmarks[2]);
+  const angel3 = angel(landmarks[2], landmarks[1], landmarks[0], landmarks[1]);
+  const isStraight = straightThumb(angel1) && straightThumb(angel2) && straightThumb(angel3);
+  return larger(d4, d3) || isStraight ;
+};
+
+const isFirstOpen = (landmarks) => {
+  const d8 = D2(landmarks[8], landmarks[0]);
+  const d7 = D2(landmarks[7], landmarks[0]);
+  const d6 = D2(landmarks[6], landmarks[0]);
+
+  const angel1 = angel(landmarks[8], landmarks[7], landmarks[6], landmarks[7]);
+  const angel2 = angel(landmarks[7], landmarks[6], landmarks[5], landmarks[6]);
+  const angel3 = angel(landmarks[6], landmarks[5], landmarks[0], landmarks[5]);
+  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  return larger(d8, d7) || larger(d8, d6) || isStraight ;
+};
+
+const isSecondOpen = (landmarks) => {
+  const d12 = D2(landmarks[12], landmarks[0]);
+  const d11 = D2(landmarks[11], landmarks[0]);
+  const d10 = D2(landmarks[10], landmarks[0]);
+  const angel1 = angel(landmarks[12], landmarks[11], landmarks[10], landmarks[11]);
+  const angel2 = angel(landmarks[11], landmarks[10], landmarks[9], landmarks[10]);
+  const angel3 = angel(landmarks[10], landmarks[9], landmarks[0], landmarks[9]);
+  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  return larger(d12, d11) || larger(d12, d10) || isStraight ;
+};
+
+const isThirdOpen = (landmarks) => {
+  const d16 = D2(landmarks[16], landmarks[0]);
+  const d15 = D2(landmarks[15], landmarks[0]);
+  const d14 = D2(landmarks[14], landmarks[0]);
+  const angel1 = angel(landmarks[16], landmarks[15], landmarks[14], landmarks[15]);
+  const angel2 = angel(landmarks[15], landmarks[14], landmarks[13], landmarks[14]);
+  const angel3 = angel(landmarks[14], landmarks[13], landmarks[0], landmarks[13]);
+  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  return larger(d16, d15) || larger(d16, d14) || isStraight;
+};
+
+const isFourthOpen = (landmarks) => {
+  const d20 = D2(landmarks[20], landmarks[0]);
+  const d19 = D2(landmarks[19], landmarks[0]);
+  const d18 = D2(landmarks[18], landmarks[0]);
+  const angel1 = angel(landmarks[20], landmarks[19], landmarks[18], landmarks[19]);
+  const angel2 = angel(landmarks[19], landmarks[18], landmarks[17], landmarks[18]);
+  const angel3 = angel(landmarks[18], landmarks[17], landmarks[0], landmarks[17]);
+  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  return larger(d20, d19) || larger(d20, d18) || isStraight;
+};
+
+const isThumbUp = (landmarks) => {
+  return landmarks[3][1] < landmarks[2][1];
+};
+
+const isThumbDown = (landmarks) => {
+  return landmarks[3][1] > landmarks[2][1];
+};
+
+
 function App() {
   const localVideoRef = useRef(null);
   const canvasRef = useRef(null)
   const layerRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
-  const [thumbOpen, setThumbOpen] = useState(false);
+
   const [thumbUp, setThumbUp] = useState(false);
+  const [thumbDown, setThumbDown] = useState(false);
+
+  const [thumbOpen, setThumbOpen] = useState(false);
   const [firstOpen, setFirstOpen] = useState(false);
+  const [secondOpen, setSecondOpen] = useState(false);
+  const [thirdOpen, setThirdOpen] = useState(false);
+  const [fourthOpen, setFourthOpen] = useState(false);
+
+  const [poseThumbUp, setPoseThumbUp] = useState(false);
+  const [poseThumbDown, setPoseThumbDown] = useState(false);
+
   const canvasWidth = 640;
   const canvasHeight = 360;
 
@@ -51,7 +155,7 @@ function App() {
   /**
    * Setup Canvas and Prediction
    */
-  useEffect(()=>{
+  useEffect(() => {
     const video = localVideoRef.current;
     const canvas = canvasRef.current;
     const layer = layerRef.current;
@@ -60,9 +164,9 @@ function App() {
 
     // Assign css size to be screen size
     canvas.width = canvasWidth;
-    canvas.height= canvasHeight;
+    canvas.height = canvasHeight;
     layer.width = canvasWidth;
-    layer.height= canvasHeight;
+    layer.height = canvasHeight;
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
@@ -91,7 +195,7 @@ function App() {
         // draw line of 4 landmark points for each finger
         for (let j = 1; j <= window.FINGER_LANDMARK_POINTS; j++) {
           region.lineTo(predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][0],
-                        predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][1]);
+            predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][1]);
         }
 
         ltx.stroke(region);
@@ -99,12 +203,12 @@ function App() {
     }
 
     async function draw(tm) {
-      if(video.paused || video.ended) return false;
+      if (video.paused || video.ended) return false;
 
       // FPS calculation
       const dt = tm - window.prevTime;
       window.prevTime = tm;
-      window.fps = window.fps * 0.85 + (1000/dt) * 0.15;
+      window.fps = window.fps * 0.85 + (1000 / dt) * 0.15;
       setUiFPS(window.fps.toFixed(2));
 
       // Draw video to canvas
@@ -116,7 +220,7 @@ function App() {
       // Hand prediction
       const predictions = await computeHandpose(canvas);
       if (predictions.length > 0) {
-        
+
         drawPrediction(predictions[0].landmarks);
 
         // refer to this pic (this is left hand, right hand is similar): https://gist.github.com/TheJLifeX/74958cc59db477a91837244ff598ef4a#file-02-landmarks-jpg
@@ -124,41 +228,13 @@ function App() {
 
         // TODO: add both x axis and y axis check
         // right hand, palm facing the screen
-        if (landmarks[4][0] < landmarks[3][0] && 
-            landmarks[4][0] < landmarks[2][0] &&
-            landmarks[4][0] < landmarks[1][0]) {
-            console.log("Iteration: ", window.iterator++, 
-                      ", landmarks 2 3 4: ", 
-                      landmarks[2],
-                      landmarks[3],
-                      landmarks[4]);
-            setThumbOpen(false);
-        } else {
-          setThumbOpen(true);
-        }
-
-        if (landmarks[8][1] < landmarks[7][1] &&
-          landmarks[8][1] < landmarks[6][1] &&
-          landmarks[8][1] < landmarks[5][1]) {
-          setFirstOpen(true);
-        } else {
-          setFirstOpen(false);
-        }
-
-        if (landmarks[3][1] < landmarks[2][1] && 
-            landmarks[4][1] < landmarks[2][1] &&
-            landmarks[3][1] < landmarks[8][1] &&
-            landmarks[4][1] < landmarks[6][1]) {
-            console.log("Iteration: ", window.iterator++, 
-                    ", landmarks 2 3 4 8: ", 
-                    landmarks[2],
-                    landmarks[3],
-                    landmarks[4],
-                    landmarks[8]);
-            setThumbUp(true);
-        } else {
-          setThumbUp(false);
-        }
+        setThumbOpen(isThumbOpen(landmarks));
+        setFirstOpen(isFirstOpen(landmarks));
+        setSecondOpen(isSecondOpen(landmarks));
+        setThirdOpen(isThirdOpen(landmarks));
+        setFourthOpen(isFourthOpen(landmarks));
+        setThumbUp(isThumbUp(landmarks));
+        setThumbDown(isThumbDown(landmarks));
       }
 
       window.requestAnimationFrame(draw);
@@ -166,10 +242,18 @@ function App() {
 
     video.addEventListener('play', function() {
       window.requestAnimationFrame(draw);
-      console.log('Ready', canvas.width, canvas.height, video.paused , video.ended)
+      console.log('Ready', canvas.width, canvas.height, video.paused, video.ended)
     });
 
   }, []);
+
+  /**
+   * Pose Logic
+   */
+  useEffect(()=>{
+    setPoseThumbUp(thumbUp && thumbOpen && !firstOpen && !secondOpen && !thirdOpen && !fourthOpen);
+    setPoseThumbDown(thumbDown && thumbOpen && !firstOpen && !secondOpen && !thirdOpen && !fourthOpen);
+  }, [thumbUp, thumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
 
   return (
     <div className="app">
@@ -186,7 +270,7 @@ function App() {
         <div className="inline-block-lg">
           <p><strong>Computer Vision View</strong></p>
           <div className="canvas-container">
-            <canvas ref={canvasRef} className="grayscale"/>
+            <canvas ref={canvasRef} className="grayscale" />
             <canvas ref={layerRef} />
           </div>
         </div>
@@ -200,9 +284,17 @@ function App() {
         <div className="inline-block-sm">
           <strong>Predicted Gesture</strong><br />
           <div className="predicted-gesture">
-            <div>{`Thumb is open: ${thumbOpen}`}</div>
+            <div>{`Pose ThumbUp: ${poseThumbUp}`}</div>
+            <div>{`Pose ThumbDown: ${poseThumbDown}`}</div>
+            <hr></hr>
             <div>{`Thumb is up: ${thumbUp}`}</div>
-            <div>{`First is open: ${firstOpen}`}</div>
+            <div>{`Thumb is down: ${thumbDown}`}</div>
+            <hr></hr>
+            <div>{`Thumb is open: ${thumbOpen}`}</div>
+            <div>{`1st is open: ${firstOpen}`}</div>
+            <div>{`2nd is open: ${secondOpen}`}</div>
+            <div>{`3rd is open: ${thirdOpen}`}</div>
+            <div>{`4th is open: ${fourthOpen}`}</div>
           </div>
         </div>
       </div>

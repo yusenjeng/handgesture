@@ -53,7 +53,8 @@ video {
 
 .predicted-gesture {
   border: 2px solid black;
-  width: 150px;
-  height: 150px;
+  width: fit-content;
+  height: fit-content;
   margin-top: 5px;
+  padding: 8px 2px;
 }
