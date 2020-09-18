@@ -17,6 +17,7 @@ window.FINGER_LANDMARK_POINTS = 4;
 function App() {
   const localVideoRef = useRef(null);
   const canvasRef = useRef(null)
+  const layerRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
   const [thumbOpen, setThumbOpen] = useState(false);
   const [thumbUp, setThumbUp] = useState(false);
@@ -53,14 +54,15 @@ function App() {
   useEffect(()=>{
     const video = localVideoRef.current;
     const canvas = canvasRef.current;
+    const layer = layerRef.current;
     const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-    ctx.strokeStyle = 'red';
-    ctx.fillStyle = 'red';
+    const ltx = layer.getContext('2d');
 
     // Assign css size to be screen size
     canvas.width = canvasWidth;
     canvas.height= canvasHeight;
+    layer.width = canvasWidth;
+    layer.height= canvasHeight;
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
@@ -70,17 +72,17 @@ function App() {
 
     const drawPrediction = function(predictedPoints) {
       // draw points
-      ctx.fillStyle = "white";
+      ltx.fillStyle = 'lime';
       for (let i = 0; i < predictedPoints.length; i++) {
         const y = predictedPoints[i][0];
         const x = predictedPoints[i][1];
-        ctx.beginPath();
-        ctx.arc(y, x, 3, 0, 2 * Math.PI);
-        ctx.fill();
+        ltx.beginPath();
+        ltx.arc(y, x, 3, 0, 2 * Math.PI);
+        ltx.fill();
       }
 
       // draw lines
-      ctx.strokeStyle = "white";
+      ltx.strokeStyle = 'lime';
       for (let i = 0; i < window.fingers.length; i++) {
         const region = new Path2D();
         const basePoint = predictedPoints[0];
@@ -92,7 +94,7 @@ function App() {
                         predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][1]);
         }
 
-        ctx.stroke(region);
+        ltx.stroke(region);
       }
     }
 
@@ -107,6 +109,9 @@ function App() {
 
       // Draw video to canvas
       ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+
+      // Clear prediction layer
+      ltx.clearRect(0, 0, canvasWidth, canvasHeight);
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
@@ -167,31 +172,32 @@ function App() {
   }, []);
 
   return (
-    <div className="App">
+    <div className="app">
 
       <div className="app-header">
-        <h1><img className="cisco-logo" src={logo} />Cisco Webex GestureUI Demo</h1>
+        <h1><img className="cisco-logo" src={logo} />Webex GestureUI Demo</h1>
       </div>
 
       <div>
-        <table>
-          <tr>
-            <th>User View</th>
-            <th>Computer Vision View</th>
-          </tr>
-          <tr>
-            <td><video autoPlay ref={localVideoRef} /></td>
-            <td><canvas ref={canvasRef} /></td>
-          </tr>
-        </table>
+        <div className="inline-block-lg">
+          <p><strong>User View</strong></p>
+          <video autoPlay ref={localVideoRef} />
+        </div>
+        <div className="inline-block-lg">
+          <p><strong>Computer Vision View</strong></p>
+          <div className="canvas-container">
+            <canvas ref={canvasRef} className="grayscale"/>
+            <canvas ref={layerRef} />
+          </div>
+        </div>
       </div>
 
       <div>
-        <div className="inline-block">
+        <div className="inline-block-sm">
           <strong>Statistics</strong><br />
           <span>Average FPS: {uiFPS}</span>
         </div>
-        <div className="inline-block">
+        <div className="inline-block-sm">
           <strong>Predicted Gesture</strong><br />
           <div className="predicted-gesture">
             <div>{`Thumb is open: ${thumbOpen}`}</div>

@@ -1,4 +1,4 @@
-.App {
+.app {
   font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif;
   font-weight: 300;
 }
@@ -6,7 +6,9 @@
 canvas {
   width: 640px;
   height: 360px;
-  filter: grayscale(100%);
+  left: 0;
+  top: 0;
+  position: absolute;
 }
 
 video {
@@ -18,7 +20,10 @@ video {
   background-color: #049Fd9;
   color: white;
   padding: 1px;
-  margin-bottom: 20px;
+}
+
+.canvas-container {
+  position: relative;
 }
 
 .cisco-logo {
@@ -27,15 +32,28 @@ video {
   padding-right: 10px;
 }
 
-.inline-block {
+.grayscale {
+  filter: grayscale(100%);
+}
+
+.inline-block-lg {
   display: inline-block;
-  padding-top: 20px;
+  width: 640px;
+  margin: 0 10px;
+  text-align: center;
   vertical-align: top;
-  width: 200px
+}
+
+.inline-block-sm {
+  display: inline-block;
+  width: 200px;
+  margin: 10px;
+  vertical-align: top;
 }
 
 .predicted-gesture {
   border: 2px solid black;
   width: 150px;
   height: 150px;
+  margin-top: 5px;
 }
