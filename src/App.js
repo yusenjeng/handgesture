@@ -4,7 +4,16 @@ import '@tensorflow/tfjs-backend-webgl';
 import '@tensorflow/tfjs-backend-cpu';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
-import logo from './cisco-logo.png'
+
+import imgCiscoLogo from './img/cisco-logo.png';
+import imgHandOne from './img/hand-one.png';
+import imgHandTwo from './img/hand-two.png';
+import imgHandThree from './img/hand-three.png';
+import imgHandFour from './img/hand-four.png';
+import imgHandFive from './img/hand-five.png';
+import imgHandThumbsUp from './img/hand-thumbsup.png';
+import imgHandThumbsDown from './img/hand-thumbsdown.png';
+import imgHandNone from './img/hand-blank.png';
 
 window.model = null;
 window.iterator = 0;
@@ -130,6 +139,8 @@ function App() {
 
   const [poseThumbUp, setPoseThumbUp] = useState(false);
   const [poseThumbDown, setPoseThumbDown] = useState(false);
+
+  const [predictedImage, setPredictedImage] = useState(false);
 
   const canvasWidth = 640;
   const canvasHeight = 360;
@@ -268,11 +279,34 @@ function App() {
     setPoseThumbDown(thumbDown && thumbOpen && !firstOpen && !secondOpen && !thirdOpen && !fourthOpen);
   }, [thumbUp, thumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
 
+  /**
+   * Image Logic
+   */
+  useEffect(()=>{
+    if (poseThumbUp) {
+      setPredictedImage(imgHandThumbsUp);
+    } else if (poseThumbDown) {
+      setPredictedImage(imgHandThumbsDown);
+    } else if (thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen) {
+      setPredictedImage(imgHandFive);
+    } else if (!thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen) {
+      setPredictedImage(imgHandFour);
+    } else if (!thumbOpen && firstOpen && secondOpen && thirdOpen && !fourthOpen) {
+      setPredictedImage(imgHandThree);
+    } else if (!thumbOpen && firstOpen && secondOpen && !thirdOpen && !fourthOpen) {
+      setPredictedImage(imgHandTwo);
+    } else if (!thumbOpen && firstOpen && !secondOpen && !thirdOpen && !fourthOpen) {
+      setPredictedImage(imgHandOne);
+    }else {
+      setPredictedImage(imgHandNone);
+    }
+  }, [poseThumbUp, poseThumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
+
   return (
     <div className="app">
 
       <div className="app-header">
-        <h1><img className="cisco-logo" src={logo} />Webex GestureUI Demo</h1>
+        <h1><img className="cisco-logo" src={imgCiscoLogo} />Webex GestureUI Demo</h1>
       </div>
 
       <div>
@@ -296,27 +330,19 @@ function App() {
         </div>
 
         <div className="inline-block-sm">
-          <strong>Predicted Fingers</strong><br />
-          <div className="predicted-gesture">
-            <div>{`Thumb is up: ${thumbUp}`}</div>
-            <div>{`Thumb is down: ${thumbDown}`}</div>
-            <hr></hr>
-            <div>{`Thumb is open: ${thumbOpen}`}</div>
-            <div>{`1st is open: ${firstOpen}`}</div>
-            <div>{`2nd is open: ${secondOpen}`}</div>
-            <div>{`3rd is open: ${thirdOpen}`}</div>
-            <div>{`4th is open: ${fourthOpen}`}</div>
-          </div>
+          <strong>Fingers</strong><br />
+          <div>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Pinkie: ${fourthOpen ? 'open' : 'closed'}`}</div>
         </div>
 
         <div className="inline-block-sm">
-          <strong>Predicted Poses</strong><br />
-          <div className="predicted-gesture">
-            <div>{`Pose ThumbUp: ${poseThumbUp}`}</div>
-            <div>{`Pose ThumbDown: ${poseThumbDown}`}</div>
-
-          </div>
+          <strong>Predicted Gesture</strong><br />
+          <img className="predicted-gesture" src={predictedImage} />
         </div>
+
       </div>
 
     </div>
