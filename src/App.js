@@ -22,6 +22,7 @@ window.prevTime = 0;
 
 window.fingers = ['thumb', 'indexFinger', 'middleFinger', 'ringFinger', 'pinky'];
 window.FINGER_LANDMARK_POINTS = 4;
+window.HAND_THRESHOLD = 0.96;
 
 /**
  * geometric functions
@@ -235,7 +236,7 @@ function App() {
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
-      if (predictions.length > 0) {
+      if (predictions.length > 0 && predictions[0].handInViewConfidence > HAND_THRESHOLD) {
 
         drawPrediction(predictions[0].landmarks);
 
