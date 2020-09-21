@@ -140,7 +140,7 @@ function App() {
   const [poseThumbUp, setPoseThumbUp] = useState(false);
   const [poseThumbDown, setPoseThumbDown] = useState(false);
 
-  const [predictedImage, setPredictedImage] = useState(false);
+  const [predictedImage, setPredictedImage] = useState(null);
 
   const canvasWidth = 640;
   const canvasHeight = 360;
