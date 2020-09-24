@@ -4,16 +4,16 @@
 }
 
 canvas {
-  width: 640px;
-  height: 360px;
   left: 0;
-  top: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
   position: absolute;
+  transform: scaleX(-1);
 }
 
 video {
-  width: 640px;
-  height: 360px;
+  transform: scaleX(-1);
 }
 
 .app-header {
@@ -30,10 +30,6 @@ video {
   height: 24px;
   padding-left: 10px;
   padding-right: 10px;
-}
-
-.grayscale {
-  filter: grayscale(100%);
 }
 
 .inline-block-lg {

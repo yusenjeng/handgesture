@@ -129,6 +129,9 @@ function App() {
   const layerRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
 
+  const [picWidth, setPicWidth] = useState(640);
+  const [picHeight, setPicHeight] = useState(360);
+
   const [thumbUp, setThumbUp] = useState(false);
   const [thumbDown, setThumbDown] = useState(false);
 
@@ -143,9 +146,6 @@ function App() {
 
   const [predictedImage, setPredictedImage] = useState(null);
 
-  const canvasWidth = 640;
-  const canvasHeight = 360;
-
   /**
    * Setup model and cam video
    */
@@ -157,13 +157,21 @@ function App() {
       window.model = await handtrack.load();
       console.log("ML model loaded. Elapsed time: ", new Date().getTime() - startLoadTime);
 
-      const constraints = {audio: false, video: {width: canvasWidth, height: canvasHeight}};
+      const constraints = {audio: false, video: {width: 480, height: 360}};
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Get user media success!", stream);
 
       // for react
       localVideoRef.current.srcObject = stream;
       localVideoRef.current.play();
+
+      // Update css size to be video size
+      setPicWidth(stream.getVideoTracks()[0].getSettings().width);
+      setPicHeight(stream.getVideoTracks()[0].getSettings().height);
+      canvasRef.current.width = picWidth;
+      canvasRef.current.height = picHeight;
+      layerRef.current.width = picWidth;
+      layerRef.current.height = picHeight;
     }
 
     setup();
@@ -178,12 +186,6 @@ function App() {
     const layer = layerRef.current;
     const ctx = canvas.getContext('2d');
     const ltx = layer.getContext('2d');
-
-    // Assign css size to be screen size
-    canvas.width = canvasWidth;
-    canvas.height = canvasHeight;
-    layer.width = canvasWidth;
-    layer.height = canvasHeight;
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
@@ -229,10 +231,10 @@ function App() {
       setUiFPS(window.fps.toFixed(2));
 
       // Draw video to canvas
-      ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+      ctx.drawImage(video, 0, 0, picWidth, picHeight);
 
       // Clear prediction layer
-      ltx.clearRect(0, 0, canvasWidth, canvasHeight);
+      ltx.clearRect(0, 0, picWidth, picHeight);
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
@@ -313,13 +315,13 @@ function App() {
       <div>
         <div className="inline-block-lg">
           <p><strong>User View</strong></p>
-          <video autoPlay ref={localVideoRef} />
+          <video autoPlay ref={localVideoRef} style={{width: picWidth, height: picHeight}} />
         </div>
         <div className="inline-block-lg">
           <p><strong>Computer Vision View</strong></p>
           <div className="canvas-container">
-            <canvas ref={canvasRef} className="grayscale" />
-            <canvas ref={layerRef} />
+            <canvas ref={canvasRef} style={{width: picWidth, height: picHeight, filter: "grayscale(100%)"}} />
+            <canvas ref={layerRef} style={{width: picWidth, height: picHeight}} />
           </div>
         </div>
       </div>
@@ -336,7 +338,7 @@ function App() {
           <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
           <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
           <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
-          <div>{`Pinkie: ${fourthOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
         </div>
 
         <div className="inline-block-sm">
