@@ -155,6 +155,17 @@ function App() {
 
   const [predictedImage, setPredictedImage] = useState(null);
 
+  const [parameter1, setParameter1] = useState(50);
+  const [parameter2, setParameter2] = useState(50);
+
+  const updateParameter = (event) => {
+    if (event.target.id === "parameter1") {
+      setParameter1(event.target.value);
+    } else if (event.target.id === "parameter2") {
+      setParameter2(event.target.value);
+    }
+  };
+
   /**
    * Setup model and cam video
    */
@@ -347,7 +358,7 @@ function App() {
         </div>
 
         <div className="inline-block-sm">
-          <strong>Fingers</strong><br />
+          <strong>Finger Data</strong><br />
           <div>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</div>
           <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
           <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
@@ -356,9 +367,20 @@ function App() {
         </div>
 
         <div className="inline-block-sm">
-          <strong>Predicted Gesture</strong><br />
+          <strong>Predicted Pose</strong><br />
           <img className="predicted-gesture" src={predictedImage} />
         </div>
+
+        <div className="inline-block-sm">
+          <strong>Settings</strong><br />
+          <p>
+            Parameter 1: {`${parameter1}`} <input type="range" min="1" max="100" value={parameter1} onChange={updateParameter} id="parameter1" />
+          </p>
+          <p>
+            Parameter 2: {`${parameter2}`} <input type="range" min="1" max="100" value={parameter2} onChange={updateParameter} id="parameter2" />
+          </p>
+        </div>
+
 
       </div>
 
