@@ -31,7 +31,10 @@ const D2 = (v1, v2) => {
   return Math.sqrt((v1[0] - v2[0]) ** 2 + (v1[1] - v2[1]) ** 2).toFixed(1);
 }
 const larger = (d1, d2) => {
-  return d1 - d2 > 30;
+  return d1 - d2 > 15;
+}
+const largerForThumb = (d1, d2) => {
+  return d1 - d2 > 10;
 }
 const angel = (A1, A2, B1, B2) => {
   var dAx = A2[0] - A1[0];
@@ -64,7 +67,7 @@ const isThumbOpen = (landmarks) => {
   const angel2 = angel(landmarks[3], landmarks[2], landmarks[1], landmarks[2]);
   const angel3 = angel(landmarks[2], landmarks[1], landmarks[0], landmarks[1]);
   const isStraight = straightThumb(angel1) && straightThumb(angel2) && straightThumb(angel3);
-  return !isFist && (larger(d4, d3) || isStraight);
+  return !isFist && largerForThumb(d4, d3) && isStraight;
 };
 
 const isFirstOpen = (landmarks) => {
@@ -76,7 +79,8 @@ const isFirstOpen = (landmarks) => {
   const angel2 = angel(landmarks[7], landmarks[6], landmarks[5], landmarks[6]);
   const angel3 = angel(landmarks[6], landmarks[5], landmarks[0], landmarks[5]);
   const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
-  return larger(d8, d7) || larger(d8, d6) || isStraight ;
+  // console.log("larger d8d7: ", larger(d8, d7), "larger d8d6: ", larger(d8, d6), "isStraight: ", isStraight);
+  return isStraight && larger(d8, d7) && larger(d8, d6);
 };
 
 const isSecondOpen = (landmarks) => {
@@ -87,7 +91,7 @@ const isSecondOpen = (landmarks) => {
   const angel2 = angel(landmarks[11], landmarks[10], landmarks[9], landmarks[10]);
   const angel3 = angel(landmarks[10], landmarks[9], landmarks[0], landmarks[9]);
   const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
-  return larger(d12, d11) || larger(d12, d10) || isStraight ;
+  return isStraight && larger(d12, d11) && larger(d12, d10);
 };
 
 const isThirdOpen = (landmarks) => {
@@ -98,7 +102,7 @@ const isThirdOpen = (landmarks) => {
   const angel2 = angel(landmarks[15], landmarks[14], landmarks[13], landmarks[14]);
   const angel3 = angel(landmarks[14], landmarks[13], landmarks[0], landmarks[13]);
   const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
-  return larger(d16, d15) || larger(d16, d14) || isStraight;
+  return isStraight && larger(d16, d15) && larger(d16, d14);
 };
 
 const isFourthOpen = (landmarks) => {
@@ -109,7 +113,7 @@ const isFourthOpen = (landmarks) => {
   const angel2 = angel(landmarks[19], landmarks[18], landmarks[17], landmarks[18]);
   const angel3 = angel(landmarks[18], landmarks[17], landmarks[0], landmarks[17]);
   const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
-  return larger(d20, d19) || larger(d20, d18) || isStraight;
+  return isStraight && larger(d20, d19) && larger(d20, d18);
 };
 
 const isThumbUp = (landmarks) => {
