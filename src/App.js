@@ -242,7 +242,7 @@ function App() {
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
-      if (predictions.length > 0 && predictions[0].handInViewConfidence > HAND_THRESHOLD) {
+      if (predictions.length > 0 && predictions[0].handInViewConfidence > window.HAND_THRESHOLD) {
 
         drawPrediction(predictions[0].landmarks);
 
