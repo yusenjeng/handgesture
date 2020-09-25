@@ -34,7 +34,7 @@ video {
 
 .inline-block-lg {
   display: inline-block;
-  width: 640px;
+  width: 480px;
   margin: 0 10px;
   text-align: center;
   vertical-align: top;
@@ -42,7 +42,7 @@ video {
 
 .inline-block-sm {
   display: inline-block;
-  width: 200px;
+  width: 175px;
   margin: 10px;
   vertical-align: top;
 }

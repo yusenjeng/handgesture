@@ -147,6 +147,11 @@ function App() {
 
   const [poseThumbUp, setPoseThumbUp] = useState(false);
   const [poseThumbDown, setPoseThumbDown] = useState(false);
+  const [poseOne, setPoseOne] = useState(false);
+  const [poseTwo, setPoseTwo] = useState(false);
+  const [poseThree, setPoseThree] = useState(false);
+  const [poseFour, setPoseFour] = useState(false);
+  const [poseFive, setPoseFive] = useState(false);
 
   const [predictedImage, setPredictedImage] = useState(null);
 
@@ -284,6 +289,11 @@ function App() {
   useEffect(()=>{
     setPoseThumbUp(thumbUp && thumbOpen && !firstOpen && !secondOpen && !thirdOpen && !fourthOpen);
     setPoseThumbDown(thumbDown && thumbOpen && !firstOpen && !secondOpen && !thirdOpen && !fourthOpen);
+    setPoseOne(!thumbOpen && firstOpen && !secondOpen && !thirdOpen && !fourthOpen);
+    setPoseTwo(!thumbOpen && firstOpen && secondOpen && !thirdOpen && !fourthOpen);
+    setPoseThree(!thumbOpen && firstOpen && secondOpen && thirdOpen && !fourthOpen);
+    setPoseFour(!thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen);
+    setPoseFive(thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen);
   }, [thumbUp, thumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
 
   /**
@@ -294,20 +304,20 @@ function App() {
       setPredictedImage(imgHandThumbsUp);
     } else if (poseThumbDown) {
       setPredictedImage(imgHandThumbsDown);
-    } else if (thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen) {
+    } else if (poseFive) {
       setPredictedImage(imgHandFive);
-    } else if (!thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen) {
+    } else if (poseFour) {
       setPredictedImage(imgHandFour);
-    } else if (!thumbOpen && firstOpen && secondOpen && thirdOpen && !fourthOpen) {
+    } else if (poseThree) {
       setPredictedImage(imgHandThree);
-    } else if (!thumbOpen && firstOpen && secondOpen && !thirdOpen && !fourthOpen) {
+    } else if (poseTwo) {
       setPredictedImage(imgHandTwo);
-    } else if (!thumbOpen && firstOpen && !secondOpen && !thirdOpen && !fourthOpen) {
+    } else if (poseOne) {
       setPredictedImage(imgHandOne);
     }else {
       setPredictedImage(imgHandNone);
     }
-  }, [poseThumbUp, poseThumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
+  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne]);
 
   return (
     <div className="app">
