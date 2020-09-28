@@ -213,7 +213,9 @@ function App() {
       return predictions;
     }
 
-    const drawPrediction = function(predictedPoints) {
+    const drawPrediction = function(prediction) {
+      var predictedPoints = prediction.landmarks;
+
       // draw points
       ltx.fillStyle = 'lime';
       for (let i = 0; i < predictedPoints.length; i++) {
@@ -239,6 +241,17 @@ function App() {
 
         ltx.stroke(region);
       }
+
+      // draw bounding box
+      ltx.strokeStyle = 'aqua';
+      const bb_x = prediction.boundingBox.topLeft[0];
+      const bb_y = prediction.boundingBox.topLeft[1];
+      const bb_width = prediction.boundingBox.bottomRight[0] - bb_x;
+      const bb_height = prediction.boundingBox.bottomRight[1] - bb_y;
+      ltx.rect(bb_x, bb_y, bb_width, bb_height);
+      console.log(bb_x, bb_y, bb_width, bb_height);
+      ltx.stroke();
+
     }
 
     async function draw(tm) {
@@ -260,7 +273,7 @@ function App() {
       const predictions = await computeHandpose(canvas);
       if (predictions.length > 0 && predictions[0].handInViewConfidence > window.HAND_THRESHOLD) {
 
-        drawPrediction(predictions[0].landmarks);
+        drawPrediction(predictions[0]);
 
         // refer to this pic (this is left hand, right hand is similar): https://gist.github.com/TheJLifeX/74958cc59db477a91837244ff598ef4a#file-02-landmarks-jpg
         const landmarks = predictions[0].landmarks;
