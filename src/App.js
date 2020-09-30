@@ -5,6 +5,8 @@ import '@tensorflow/tfjs-backend-cpu';
 import * as tf from '@tensorflow/tfjs';
 import './App.css';
 
+import ParamSlider from './ParamSlider';
+
 import imgCiscoLogo from './img/cisco-logo.png';
 import imgHandOne from './img/hand-one.png';
 import imgHandTwo from './img/hand-two.png';
@@ -29,6 +31,9 @@ window.HAND_THRESHOLD = 0.96;
  */
 const D2 = (v1, v2) => {
   return Math.sqrt((v1[0] - v2[0]) ** 2 + (v1[1] - v2[1]) ** 2).toFixed(1);
+}
+const diff = (d1, d2) => {
+  return d1 - d2;
 }
 const larger = (d1, d2) => {
   return d1 - d2 > 15;
@@ -158,11 +163,12 @@ function App() {
   const [parameter1, setParameter1] = useState(50);
   const [parameter2, setParameter2] = useState(50);
 
-  const updateParameter = (event) => {
-    if (event.target.id === "parameter1") {
-      setParameter1(event.target.value);
-    } else if (event.target.id === "parameter2") {
-      setParameter2(event.target.value);
+  const updateParam = (id, value) => {
+    if (id === "parameter1") {
+      console.log(value);
+      setParameter1(value);
+    } else if (id === "parameter2") {
+      setParameter2(value);
     }
   };
 
@@ -385,13 +391,14 @@ function App() {
         </div>
 
         <div className="inline-block-sm">
-          <strong>Settings</strong><br />
+          {/* <strong>Settings</strong><br />
           <p>
             Parameter 1: {`${parameter1}`} <input type="range" min="1" max="100" value={parameter1} onChange={updateParameter} id="parameter1" />
           </p>
           <p>
             Parameter 2: {`${parameter2}`} <input type="range" min="1" max="100" value={parameter2} onChange={updateParameter} id="parameter2" />
-          </p>
+          </p> */}
+          <ParamSlider param1={parameter1} param2={parameter2} updateParam={updateParam}/>
         </div>
 
 
