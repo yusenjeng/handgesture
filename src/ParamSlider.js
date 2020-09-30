@@ -11,7 +11,7 @@ function ParamSlider(props) {
     <div>
       <strong>Settings</strong><br />
           <p>
-            Parameter 1: {`${props.param1}`} <input type="range" min="1" max="100" value={props.param1} onChange={updateParameter} id="parameter1" />
+            ThumbDist: {`${props.param1}`} <input type="range" min="1" max="100" value={props.param1} onChange={updateParameter} id="thumbDist" />
           </p>
           <p>
             Parameter 2: {`${props.param2}`} <input type="range" min="1" max="100" value={props.param2} onChange={updateParameter} id="parameter2" />
