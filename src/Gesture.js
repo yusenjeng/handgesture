@@ -31,15 +31,14 @@ function Gesture(props) {
 
   const [predictedImage, setPredictedImage] = useState(null);
 
-  const [thumbDist, setParameter1] = useState(10);
-  const [parameter2, setParameter2] = useState(100);
+  const [thumbDist, setThumbDist] = useState(10);
+  const [thumbAngle, setThumbAngle] = useState(100);
 
   const updateParam = (id, value) => {
     if (id === "thumbDist") {
-      console.log(value);
-      setParameter1(value);
-    } else if (id === "parameter2") {
-      setParameter2(value);
+      setThumbDist(value);
+    } else if (id === "thumbAngle") {
+      setThumbAngle(value);
     }
   };
 
@@ -56,10 +55,10 @@ function Gesture(props) {
     return d1 - d2 > thumbDist;
   }
   const straight = (angle) => {
-    return angle > 100;
+    return angle > thumbAngle;
   }
   const straightThumb = (angle) => {
-    return angle > 130;  // my thumb is fat and short, so sad
+    return angle > thumbAngle * 1.3;  // my thumb is fat and short, so sad
   }
 
   const angle = (A1, A2, B1, B2) => {
@@ -146,8 +145,6 @@ function Gesture(props) {
     return d > 0;
   };
 
-  
-
   useEffect(() => {
     if (props.landmarks.length > 0) {
       setThumbOpen(isThumbOpen(props.landmarks));
@@ -222,7 +219,7 @@ function Gesture(props) {
       </div>
 
       <div className="inline-block-sm">
-        <ParamSlider param1={thumbDist} param2={parameter2} updateParam={updateParam}/>
+        <ParamSlider thumbDist={thumbDist} thumbAngle={thumbAngle} updateParam={updateParam}/>
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React from 'react';
 
 function ParamSlider(props) {
 
@@ -11,10 +11,10 @@ function ParamSlider(props) {
     <div>
       <strong>Settings</strong><br />
           <p>
-            ThumbDist: {`${props.param1}`} <input type="range" min="1" max="100" value={props.param1} onChange={updateParameter} id="thumbDist" />
+            ThumbDist: {`${props.thumbDist}`} <input type="range" min="1" max="60" value={props.thumbDist} onChange={updateParameter} id="thumbDist" />
           </p>
           <p>
-            Parameter 2: {`${props.param2}`} <input type="range" min="1" max="100" value={props.param2} onChange={updateParameter} id="parameter2" />
+            ThumbAngle: {`${props.thumbAngle}`} <input type="range" min="50" max="150" value={props.thumbAngle} onChange={updateParameter} id="thumbAngle" />
           </p>
     </div>
   )
