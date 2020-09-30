@@ -41,7 +41,14 @@ const larger = (d1, d2) => {
 const largerForThumb = (d1, d2) => {
   return d1 - d2 > 10;
 }
-const angel = (A1, A2, B1, B2) => {
+const straight = (angle) => {
+  return angle > 100;
+}
+const straightThumb = (angle) => {
+  return angle > 130;  // my thumb is fat and short, so sad
+}
+
+const angle = (A1, A2, B1, B2) => {
   var dAx = A2[0] - A1[0];
   var dAy = A2[1] - A1[1];
   var dBx = B2[0] - B1[0];
@@ -50,12 +57,6 @@ const angel = (A1, A2, B1, B2) => {
   if(angle < 0) {angle = angle * -1;}
   var degree_angle = angle * (180 / Math.PI);
   return Math.floor(degree_angle);
-}
-const straight = (angel) => {
-  return angel > 100;
-}
-const straightThumb = (angel) => {
-  return angel > 130;  // my thumb is fat and short, so sad
 }
 
 /**
@@ -68,10 +69,10 @@ const isThumbOpen = (landmarks) => {
   const d46 = D2(landmarks[4], landmarks[6]);
   const isFist = d46 < 60;
 
-  const angel1 = angel(landmarks[4], landmarks[3], landmarks[2], landmarks[3]);
-  const angel2 = angel(landmarks[3], landmarks[2], landmarks[1], landmarks[2]);
-  const angel3 = angel(landmarks[2], landmarks[1], landmarks[0], landmarks[1]);
-  const isStraight = straightThumb(angel1) && straightThumb(angel2) && straightThumb(angel3);
+  const angle1 = angle(landmarks[4], landmarks[3], landmarks[2], landmarks[3]);
+  const angle2 = angle(landmarks[3], landmarks[2], landmarks[1], landmarks[2]);
+  const angle3 = angle(landmarks[2], landmarks[1], landmarks[0], landmarks[1]);
+  const isStraight = straightThumb(angle1) && straightThumb(angle2) && straightThumb(angle3);
   return !isFist && largerForThumb(d4, d3) && isStraight;
 };
 
@@ -80,10 +81,10 @@ const isFirstOpen = (landmarks) => {
   const d7 = D2(landmarks[7], landmarks[0]);
   const d6 = D2(landmarks[6], landmarks[0]);
 
-  const angel1 = angel(landmarks[8], landmarks[7], landmarks[6], landmarks[7]);
-  const angel2 = angel(landmarks[7], landmarks[6], landmarks[5], landmarks[6]);
-  const angel3 = angel(landmarks[6], landmarks[5], landmarks[0], landmarks[5]);
-  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  const angle1 = angle(landmarks[8], landmarks[7], landmarks[6], landmarks[7]);
+  const angle2 = angle(landmarks[7], landmarks[6], landmarks[5], landmarks[6]);
+  const angle3 = angle(landmarks[6], landmarks[5], landmarks[0], landmarks[5]);
+  const isStraight = straight(angle1) && straight(angle2) && straight(angle3);
   // console.log("larger d8d7: ", larger(d8, d7), "larger d8d6: ", larger(d8, d6), "isStraight: ", isStraight);
   return isStraight && larger(d8, d7) && larger(d8, d6);
 };
@@ -92,10 +93,10 @@ const isSecondOpen = (landmarks) => {
   const d12 = D2(landmarks[12], landmarks[0]);
   const d11 = D2(landmarks[11], landmarks[0]);
   const d10 = D2(landmarks[10], landmarks[0]);
-  const angel1 = angel(landmarks[12], landmarks[11], landmarks[10], landmarks[11]);
-  const angel2 = angel(landmarks[11], landmarks[10], landmarks[9], landmarks[10]);
-  const angel3 = angel(landmarks[10], landmarks[9], landmarks[0], landmarks[9]);
-  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  const angle1 = angle(landmarks[12], landmarks[11], landmarks[10], landmarks[11]);
+  const angle2 = angle(landmarks[11], landmarks[10], landmarks[9], landmarks[10]);
+  const angle3 = angle(landmarks[10], landmarks[9], landmarks[0], landmarks[9]);
+  const isStraight = straight(angle1) && straight(angle2) && straight(angle3);
   return isStraight && larger(d12, d11) && larger(d12, d10);
 };
 
@@ -103,10 +104,10 @@ const isThirdOpen = (landmarks) => {
   const d16 = D2(landmarks[16], landmarks[0]);
   const d15 = D2(landmarks[15], landmarks[0]);
   const d14 = D2(landmarks[14], landmarks[0]);
-  const angel1 = angel(landmarks[16], landmarks[15], landmarks[14], landmarks[15]);
-  const angel2 = angel(landmarks[15], landmarks[14], landmarks[13], landmarks[14]);
-  const angel3 = angel(landmarks[14], landmarks[13], landmarks[0], landmarks[13]);
-  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  const angle1 = angle(landmarks[16], landmarks[15], landmarks[14], landmarks[15]);
+  const angle2 = angle(landmarks[15], landmarks[14], landmarks[13], landmarks[14]);
+  const angle3 = angle(landmarks[14], landmarks[13], landmarks[0], landmarks[13]);
+  const isStraight = straight(angle1) && straight(angle2) && straight(angle3);
   return isStraight && larger(d16, d15) && larger(d16, d14);
 };
 
@@ -114,10 +115,10 @@ const isFourthOpen = (landmarks) => {
   const d20 = D2(landmarks[20], landmarks[0]);
   const d19 = D2(landmarks[19], landmarks[0]);
   const d18 = D2(landmarks[18], landmarks[0]);
-  const angel1 = angel(landmarks[20], landmarks[19], landmarks[18], landmarks[19]);
-  const angel2 = angel(landmarks[19], landmarks[18], landmarks[17], landmarks[18]);
-  const angel3 = angel(landmarks[18], landmarks[17], landmarks[0], landmarks[17]);
-  const isStraight = straight(angel1) && straight(angel2) && straight(angel3);
+  const angle1 = angle(landmarks[20], landmarks[19], landmarks[18], landmarks[19]);
+  const angle2 = angle(landmarks[19], landmarks[18], landmarks[17], landmarks[18]);
+  const angle3 = angle(landmarks[18], landmarks[17], landmarks[0], landmarks[17]);
+  const isStraight = straight(angle1) && straight(angle2) && straight(angle3);
   return isStraight && larger(d20, d19) && larger(d20, d18);
 };
 
@@ -391,13 +392,6 @@ function App() {
         </div>
 
         <div className="inline-block-sm">
-          {/* <strong>Settings</strong><br />
-          <p>
-            Parameter 1: {`${parameter1}`} <input type="range" min="1" max="100" value={parameter1} onChange={updateParameter} id="parameter1" />
-          </p>
-          <p>
-            Parameter 2: {`${parameter2}`} <input type="range" min="1" max="100" value={parameter2} onChange={updateParameter} id="parameter2" />
-          </p> */}
           <ParamSlider param1={parameter1} param2={parameter2} updateParam={updateParam}/>
         </div>
 
