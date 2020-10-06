@@ -16,14 +16,16 @@ window.prevTime = 0;
 window.fingers = ['thumb', 'indexFinger', 'middleFinger', 'ringFinger', 'pinky'];
 window.FINGER_LANDMARK_POINTS = 4;
 window.HAND_THRESHOLD = 0.96;
+window.displayText = '';
 
 function App() {
-  const localVideoRef = useRef(null);
+  const videoRef = useRef(null);
+  const videoLayerRef = useRef(null)
   const canvasRef = useRef(null)
-  const layerRef = useRef(null)
+  const canvasLayerRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
 
-  const [picWidth, setPicWidth] = useState(640);
+  const [picWidth, setPicWidth] = useState(480);
   const [picHeight, setPicHeight] = useState(360);
 
   const [landmarks, setLandmarks] = useState([]);
@@ -39,21 +41,23 @@ function App() {
       window.model = await handtrack.load();
       console.log("ML model loaded. Elapsed time: ", new Date().getTime() - startLoadTime);
 
-      const constraints = {audio: false, video: {width: 480, height: 360}};
+      const constraints = {audio: false, video: {width: picWidth, height: picHeight}};
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Get user media success!", stream);
 
       // for react
-      localVideoRef.current.srcObject = stream;
-      localVideoRef.current.play();
+      videoRef.current.srcObject = stream;
+      videoRef.current.play();
 
       // Update css size to be video size
       setPicWidth(stream.getVideoTracks()[0].getSettings().width);
       setPicHeight(stream.getVideoTracks()[0].getSettings().height);
+      videoLayerRef.current.width = picWidth;
+      videoLayerRef.current.height = picHeight;
       canvasRef.current.width = picWidth;
       canvasRef.current.height = picHeight;
-      layerRef.current.width = picWidth;
-      layerRef.current.height = picHeight;
+      canvasLayerRef.current.width = picWidth;
+      canvasLayerRef.current.height = picHeight;
     }
 
     setup();
@@ -63,11 +67,13 @@ function App() {
    * Setup Canvas and Prediction
    */
   useEffect(() => {
-    const video = localVideoRef.current;
+    const video = videoRef.current;
+    const videoLayer = videoLayerRef.current;
+    const vltx = videoLayer.getContext('2d');
     const canvas = canvasRef.current;
-    const layer = layerRef.current;
+    const canvasLayer = canvasLayerRef.current;
     const ctx = canvas.getContext('2d');
-    const ltx = layer.getContext('2d');
+    const cltx = canvasLayer.getContext('2d');
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
@@ -79,17 +85,17 @@ function App() {
       var predictedPoints = prediction.landmarks;
 
       // draw points
-      ltx.fillStyle = 'lime';
+      cltx.fillStyle = 'lime';
       for (let i = 0; i < predictedPoints.length; i++) {
         const y = predictedPoints[i][0];
         const x = predictedPoints[i][1];
-        ltx.beginPath();
-        ltx.arc(y, x, 3, 0, 2 * Math.PI);
-        ltx.fill();
+        cltx.beginPath();
+        cltx.arc(y, x, 3, 0, 2 * Math.PI);
+        cltx.fill();
       }
 
       // draw lines
-      ltx.strokeStyle = 'lime';
+      cltx.strokeStyle = 'lime';
       for (let i = 0; i < window.fingers.length; i++) {
         const region = new Path2D();
         const basePoint = predictedPoints[0];
@@ -101,18 +107,31 @@ function App() {
             predictedPoints[i * window.FINGER_LANDMARK_POINTS + j][1]);
         }
 
-        ltx.stroke(region);
+        cltx.stroke(region);
       }
 
       // draw bounding box
-      ltx.strokeStyle = 'aqua';
+      cltx.strokeStyle = 'aqua';
       const bb_x = prediction.boundingBox.topLeft[0];
       const bb_y = prediction.boundingBox.topLeft[1];
       const bb_width = prediction.boundingBox.bottomRight[0] - bb_x;
       const bb_height = prediction.boundingBox.bottomRight[1] - bb_y;
-      ltx.rect(bb_x, bb_y, bb_width, bb_height);
-      console.log(bb_x, bb_y, bb_width, bb_height);
-      ltx.stroke();
+      cltx.rect(bb_x, bb_y, bb_width, bb_height);
+      cltx.stroke();
+
+      // draw display text
+      if (window.displayText.trim()) {
+        vltx.beginPath();
+        vltx.fillStyle = 'white';
+        vltx.fillRect(predictedPoints[9][0] - bb_width/4, predictedPoints[9][1] - bb_height/6, bb_width/2, bb_height/3);
+        vltx.fillStyle = 'black';
+        vltx.rect(predictedPoints[9][0] - bb_width/4, predictedPoints[9][1] - bb_height/6, bb_width/2, bb_height/3);
+        vltx.textAlign = 'center';
+        vltx.textBaseline = 'middle';
+        vltx.font = (bb_width / 12) + 'px Arial';
+        vltx.fillText(window.displayText.trim(), predictedPoints[9][0], predictedPoints[9][1], bb_width/2 - 10);
+        vltx.stroke();
+      }
 
     }
 
@@ -129,7 +148,8 @@ function App() {
       ctx.drawImage(video, 0, 0, picWidth, picHeight);
 
       // Clear prediction layer
-      ltx.clearRect(0, 0, picWidth, picHeight);
+      vltx.clearRect(0, 0, picWidth, picHeight);
+      cltx.clearRect(0, 0, picWidth, picHeight);
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
@@ -138,7 +158,7 @@ function App() {
         drawPrediction(predictions[0]);
 
         // refer to this pic (this is left hand, right hand is similar): https://gist.github.com/TheJLifeX/74958cc59db477a91837244ff598ef4a#file-02-landmarks-jpg
-        landmarks = predictions[0].landmarks;   
+        landmarks = predictions[0].landmarks;
       }
       setLandmarks(landmarks);
 
@@ -162,13 +182,16 @@ function App() {
       <div>
         <div className="inline-block-lg">
           <p><strong>User View</strong></p>
-          <video autoPlay ref={localVideoRef} style={{width: picWidth, height: picHeight}} />
+          <div className="canvas-container">
+            <video autoPlay ref={videoRef} style={{width: picWidth, height: picHeight}} />
+            <canvas ref={videoLayerRef} style={{width: picWidth, height: picHeight}} />
+          </div>
         </div>
         <div className="inline-block-lg">
           <p><strong>Computer Vision View</strong></p>
           <div className="canvas-container">
             <canvas ref={canvasRef} style={{width: picWidth, height: picHeight, filter: "grayscale(100%)"}} />
-            <canvas ref={layerRef} style={{width: picWidth, height: picHeight}} />
+            <canvas ref={canvasLayerRef} style={{width: picWidth, height: picHeight}} />
           </div>
         </div>
       </div>
@@ -177,6 +200,12 @@ function App() {
         <div className="inline-block-sm">
           <strong>Statistics</strong><br />
           <span>Average FPS: {uiFPS}</span>
+        </div>
+
+        <div className="inline-block-sm">
+          <strong>Display Text</strong><br />
+          <input type="text" onChange={e => {window.displayText = e.target.value}}/>
+          <small>{window.displayText.trim() ? "hold hand up to display" : "enter text to enable"}</small>
         </div>
 
         <Gesture landmarks={landmarks} />

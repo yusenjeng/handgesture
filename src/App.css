@@ -9,11 +9,13 @@ canvas {
   margin-left: auto;
   margin-right: auto;
   position: absolute;
-  transform: scaleX(-1);
+  width: 480px;
+  height: 360px;
 }
 
 video {
-  transform: scaleX(-1);
+  width: 480px;
+  height: 360px;
 }
 
 .app-header {
@@ -24,6 +26,8 @@ video {
 
 .canvas-container {
   position: relative;
+  width: 480px;
+  height: 360px;
 }
 
 .cisco-logo {
