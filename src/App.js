@@ -18,17 +18,25 @@ window.FINGER_LANDMARK_POINTS = 4;
 window.HAND_THRESHOLD = 0.96;
 window.displayText = '';
 
+// const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
+//                             window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+
+// const cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
 function App() {
   const videoRef = useRef(null);
   const videoLayerRef = useRef(null)
   const canvasRef = useRef(null)
   const canvasLayerRef = useRef(null)
   const [uiFPS, setUiFPS] = useState(0);
+  const [videoReady, setVideoReady] = useState(false);
+  const [animationOn, setAnimationOn] = useState(false);
 
   const [picWidth, setPicWidth] = useState(480);
   const [picHeight, setPicHeight] = useState(360);
 
   const [landmarks, setLandmarks] = useState([]);
+  const [requestId, setRequestId] = useState(null);
 
   /**
    * Setup model and cam video
@@ -41,7 +49,10 @@ function App() {
       window.model = await handtrack.load();
       console.log("ML model loaded. Elapsed time: ", new Date().getTime() - startLoadTime);
 
-      const constraints = {audio: false, video: {width: picWidth, height: picHeight}};
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const deviceFacetime = devices.filter(device => /FaceTime/i.test(device.label));
+      
+      const constraints = {audio: false, video: {deviceId: deviceFacetime[0].deviceId, width: picWidth, height: picHeight}};
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Get user media success!", stream);
 
@@ -74,6 +85,11 @@ function App() {
     const canvasLayer = canvasLayerRef.current;
     const ctx = canvas.getContext('2d');
     const cltx = canvasLayer.getContext('2d');
+
+    video.addEventListener('play', function() {
+      setVideoReady(true);
+      console.log('Ready', canvas.width, canvas.height, video.paused, video.ended)
+    });
 
     const computeHandpose = async function(target) {
       const predictions = await window.model.estimateHands(target);
@@ -162,15 +178,21 @@ function App() {
       }
       setLandmarks(landmarks);
 
-      window.requestAnimationFrame(draw);
+      setRequestId(window.requestAnimationFrame(draw));
     }
 
-    video.addEventListener('play', function() {
-      window.requestAnimationFrame(draw);
-      console.log('Ready', canvas.width, canvas.height, video.paused, video.ended)
-    });
+    if (animationOn && videoReady) {
+      setRequestId(window.requestAnimationFrame(draw));
+    } else {
+      ctx.clearRect(0, 0, picWidth, picHeight);
+      cancelAnimationFrame(requestId);
+    }
+  }, [animationOn, videoReady]);
 
-  }, []);
+  const handleStartStop = (e) => {
+    setAnimationOn(!animationOn);
+    console.log("animationOn: ", animationOn);
+  }
 
   return (
     <div className="app">
@@ -194,6 +216,7 @@ function App() {
             <canvas ref={canvasLayerRef} style={{width: picWidth, height: picHeight}} />
           </div>
         </div>
+        
       </div>
 
       <div>
@@ -206,6 +229,12 @@ function App() {
           <strong>Display Text</strong><br />
           <input type="text" onChange={e => {window.displayText = e.target.value}}/>
           <small>{window.displayText.trim() ? "hold hand up to display" : "enter text to enable"}</small>
+        </div>
+
+        <div className="inline-block-sm">
+          <button id="startStop" onClick={handleStartStop} enabled={videoReady}>
+            {animationOn ? "Stop Animation" : "Start Animation"}
+          </button>
         </div>
 
         <Gesture landmarks={landmarks} />
