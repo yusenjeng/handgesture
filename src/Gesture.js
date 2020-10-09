@@ -11,6 +11,8 @@ import imgHandThumbsUp from './img/hand-thumbsup.png';
 import imgHandThumbsDown from './img/hand-thumbsdown.png';
 import imgHandNone from './img/hand-blank.png';
 
+const angleThreshold = 12;
+
 function Gesture(props) {
   const [thumbUp, setThumbUp] = useState(false);
   const [thumbDown, setThumbDown] = useState(false);
@@ -20,6 +22,10 @@ function Gesture(props) {
   const [secondOpen, setSecondOpen] = useState(false);
   const [thirdOpen, setThirdOpen] = useState(false);
   const [fourthOpen, setFourthOpen] = useState(false);
+
+  const [prevSlideAngle, setPrevSlideAngle] = useState(null);
+  const [slideLeft, setSlideLeft] = useState(false);
+  const [slideRight, setSlideRight] = useState(false);
 
   const [poseThumbUp, setPoseThumbUp] = useState(false);
   const [poseThumbDown, setPoseThumbDown] = useState(false);
@@ -75,6 +81,25 @@ function Gesture(props) {
   /**
    * Helper functions
    */
+  const checkSlide = (landmarks) => {
+    // angle between line 0-9 and x-axis
+    const currSlideAngle = angle(landmarks[9], landmarks[0], 
+                                 [landmarks[0][0] + 0.1, landmarks[0][1] + 0.1], landmarks[0]);
+    console.log("currSlideAngle: ", currSlideAngle);
+    if (prevSlideAngle) {
+      if (currSlideAngle > prevSlideAngle + angleThreshold) {
+        setSlideLeft(true);
+        setSlideRight(false); 
+        console.log("Slide left!");
+      } else if (currSlideAngle < prevSlideAngle - angleThreshold) {
+        setSlideLeft(false);
+        setSlideRight(true);   
+        console.log("Slide right!");
+      }
+    }
+    setPrevSlideAngle(currSlideAngle);
+  }
+
   const isThumbOpen = (landmarks) => {
     const d4 = D2(landmarks[4], landmarks[0]);
     const d3 = D2(landmarks[3], landmarks[0]);
@@ -154,6 +179,7 @@ function Gesture(props) {
       setFourthOpen(isFourthOpen(props.landmarks));
       setThumbUp(isThumbUp(props.landmarks));
       setThumbDown(isThumbDown(props.landmarks));
+      checkSlide(props.landmarks);
     } else {
       setThumbOpen(false);
       setFirstOpen(false);
@@ -162,6 +188,8 @@ function Gesture(props) {
       setFourthOpen(false);
       setThumbUp(false);
       setThumbDown(false);
+      setSlideLeft(false);
+      setSlideRight(false);
     }
     
   }, [props.landmarks]);
@@ -211,6 +239,8 @@ function Gesture(props) {
         <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
         <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
         <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
+        <div>{`Slide left: ${slideLeft ? 'true' : 'false'}`}</div>
+        <div>{`Slide right: ${slideRight ? 'true' : 'false'}`}</div>
       </div>
 
       <div className="inline-block-sm">

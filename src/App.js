@@ -49,10 +49,11 @@ function App() {
       window.model = await handtrack.load();
       console.log("ML model loaded. Elapsed time: ", new Date().getTime() - startLoadTime);
 
+      const constraints = {audio: false, video: {width: picWidth, height: picHeight}};
       const devices = await navigator.mediaDevices.enumerateDevices();
       const deviceFacetime = devices.filter(device => /FaceTime/i.test(device.label));
+      constraints.video.deviceId = deviceFacetime[0].deviceId;
       
-      const constraints = {audio: false, video: {deviceId: deviceFacetime[0].deviceId, width: picWidth, height: picHeight}};
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Get user media success!", stream);
 
