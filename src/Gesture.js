@@ -1,6 +1,7 @@
 import React, {useEffect, useState, useRef} from 'react';
 import ParamSlider from './ParamSlider';
 import './App.css';
+import debounce from 'lodash.debounce';
 
 import imgHandOne from './img/hand-one.png';
 import imgHandTwo from './img/hand-two.png';
@@ -10,6 +11,7 @@ import imgHandFive from './img/hand-five.png';
 import imgHandThumbsUp from './img/hand-thumbsup.png';
 import imgHandThumbsDown from './img/hand-thumbsdown.png';
 import imgHandNone from './img/hand-blank.png';
+import imgHandRock from './img/hand-rock.png';
 
 const angleThreshold = 12;
 
@@ -26,6 +28,8 @@ function Gesture(props) {
   const [prevSlideAngle, setPrevSlideAngle] = useState(null);
   const [slideLeft, setSlideLeft] = useState(false);
   const [slideRight, setSlideRight] = useState(false);
+  const [wavingCounter, setWavingCounter] = useState(0);
+  const [wavingTimer, setWavingTimer] = useState(null);
 
   const [poseThumbUp, setPoseThumbUp] = useState(false);
   const [poseThumbDown, setPoseThumbDown] = useState(false);
@@ -34,6 +38,7 @@ function Gesture(props) {
   const [poseThree, setPoseThree] = useState(false);
   const [poseFour, setPoseFour] = useState(false);
   const [poseFive, setPoseFive] = useState(false);
+  const [poseRock, setPoseRock] = useState(false);
 
   const [predictedImage, setPredictedImage] = useState(null);
 
@@ -83,18 +88,18 @@ function Gesture(props) {
    */
   const checkSlide = (landmarks) => {
     // angle between line 0-9 and x-axis
-    const currSlideAngle = angle(landmarks[9], landmarks[0], 
+    const currSlideAngle = angle(landmarks[9], landmarks[0],
                                  [landmarks[0][0] + 0.1, landmarks[0][1] + 0.1], landmarks[0]);
-    console.log("currSlideAngle: ", currSlideAngle);
+    // console.log("currSlideAngle: ", currSlideAngle);
     if (prevSlideAngle) {
       if (currSlideAngle > prevSlideAngle + angleThreshold) {
         setSlideLeft(true);
         setSlideRight(false); 
-        console.log("Slide left!");
+        // console.log("Slide left!");
       } else if (currSlideAngle < prevSlideAngle - angleThreshold) {
         setSlideLeft(false);
         setSlideRight(true);   
-        console.log("Slide right!");
+        // console.log("Slide right!");
       }
     }
     setPrevSlideAngle(currSlideAngle);
@@ -205,30 +210,86 @@ function Gesture(props) {
     setPoseThree(!thumbOpen && firstOpen && secondOpen && thirdOpen && !fourthOpen);
     setPoseFour(!thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen);
     setPoseFive(thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen);
+    setPoseRock(thumbOpen && firstOpen && !secondOpen && !thirdOpen && fourthOpen);
   }, [thumbUp, thumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
+
+  /**
+   * Waving Logic
+   */
+  useEffect(()=>{
+    // The expiration time of waving counter extends if you keep waving, or
+    // the counter will be reset in 1.5 seconds
+    const isPoseValid = poseFive || poseFour;
+    const isSliding = slideLeft || slideRight;
+    if (isPoseValid && isSliding){
+      setWavingCounter(wavingCounter+1);
+      clearTimeout(wavingTimer);
+
+      const timer = setTimeout(()=>{
+        setWavingCounter(0)
+        setWavingTimer(null);
+      }, 2000);
+
+      setWavingTimer(timer);
+    }
+  }, [slideLeft, slideRight, poseFive, poseFour]);
 
   /**
    * Image Logic
    */
   useEffect(()=>{
+    let img = imgHandNone;
     if (poseThumbUp) {
-      setPredictedImage(imgHandThumbsUp);
+      img = imgHandThumbsUp;
     } else if (poseThumbDown) {
-      setPredictedImage(imgHandThumbsDown);
+      img = imgHandThumbsDown;
     } else if (poseFive) {
-      setPredictedImage(imgHandFive);
+      img = imgHandFive;
     } else if (poseFour) {
-      setPredictedImage(imgHandFour);
+      img = imgHandFour;
     } else if (poseThree) {
-      setPredictedImage(imgHandThree);
+      img = imgHandThree;
     } else if (poseTwo) {
-      setPredictedImage(imgHandTwo);
+      img = imgHandTwo;
     } else if (poseOne) {
-      setPredictedImage(imgHandOne);
-    }else {
-      setPredictedImage(imgHandNone);
+      img = imgHandOne;
+    } else if (poseRock){
+      img = imgHandRock;
     }
-  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne]);
+
+    setPredictedImage(img);
+  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, poseRock]);
+
+  /**
+   * Gesture Event
+   */
+  useEffect(()=>{
+    let msg = '';
+    if (wavingCounter > 3){
+      msg = "Waving";
+    }else if (wavingCounter > 0){
+      msg = "";
+    }else if (poseThumbUp){
+      msg = "Thumbs Up!";
+    }else if (poseThumbDown){
+      msg = "Thumbs Down!";
+    }else if (poseFive){
+      msg = "5";
+    }else if (poseFour){
+      msg = "4";
+    }else if (poseThree){
+      msg = "3";
+    }else if (poseTwo){
+      msg = "2";
+    }else if (poseOne){
+      msg = "1";
+    }else if (poseRock){
+      msg = "Rock On!"
+    }
+
+    const debouncedOnEvent = debounce(() => props.onEvent(msg, 2000));
+    debouncedOnEvent();
+  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
   return (
     <div>
@@ -239,8 +300,9 @@ function Gesture(props) {
         <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
         <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
         <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Slide left: ${slideLeft ? 'true' : 'false'}`}</div>
-        <div>{`Slide right: ${slideRight ? 'true' : 'false'}`}</div>
+        <div>{`Slide Left: ${slideLeft ? 'true' : 'false'}`}</div>
+        <div>{`Slide Right: ${slideRight ? 'true' : 'false'}`}</div>
+        <div>{`Waving Counter: ${wavingCounter}`}</div>
       </div>
 
       <div className="inline-block-sm">

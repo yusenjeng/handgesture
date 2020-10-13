@@ -137,16 +137,18 @@ function App() {
       cltx.stroke();
 
       // draw display text
+      const posText = [...predictedPoints[9]];  // clone position array
+      posText[1] -= 30;
       if (window.displayText.trim()) {
         vltx.beginPath();
         vltx.fillStyle = 'white';
-        vltx.fillRect(predictedPoints[9][0] - bb_width/4, predictedPoints[9][1] - bb_height/6, bb_width/2, bb_height/3);
+        vltx.fillRect(posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
         vltx.fillStyle = 'black';
-        vltx.rect(predictedPoints[9][0] - bb_width/4, predictedPoints[9][1] - bb_height/6, bb_width/2, bb_height/3);
+        vltx.rect(posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
         vltx.textAlign = 'center';
         vltx.textBaseline = 'middle';
         vltx.font = (bb_width / 12) + 'px Arial';
-        vltx.fillText(window.displayText.trim(), predictedPoints[9][0], predictedPoints[9][1], bb_width/2 - 10);
+        vltx.fillText(window.displayText.trim(), posText[0], posText[1], bb_width/2 - 10);
         vltx.stroke();
       }
 
@@ -195,6 +197,10 @@ function App() {
     console.log("animationOn: ", animationOn);
   }
 
+  const onGestureEvent = (msg) => {
+    window.displayText = msg;
+  };
+
   return (
     <div className="app">
 
@@ -233,12 +239,12 @@ function App() {
         </div>
 
         <div className="inline-block-sm">
-          <button id="startStop" onClick={handleStartStop} enabled={videoReady}>
+          <button id="startStop" onClick={handleStartStop} enabled={videoReady.toString()}>
             {animationOn ? "Stop Animation" : "Start Animation"}
           </button>
         </div>
 
-        <Gesture landmarks={landmarks} />
+        <Gesture landmarks={landmarks} onEvent={onGestureEvent} />
       </div>
 
     </div>
