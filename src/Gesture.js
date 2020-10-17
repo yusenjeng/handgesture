@@ -263,48 +263,50 @@ function Gesture(props) {
     setPredictedImage(img);
   }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
-  /**
-   * Gesture Event
-   */
-  useEffect(()=>{
-    let msg = '';
-    if (wavingCounter > 3){
-      msg = "Waving";
-    }else if (wavingCounter > 0){
-      msg = "";
-    }else if (poseThumbUp){
-      msg = "Thumbs Up!";
-    }else if (poseThumbDown){
-      msg = "Thumbs Down!";
-    }else if (poseFive){
-      msg = "5";
-    }else if (poseFour){
-      msg = "4";
-    }else if (poseThree){
-      msg = "3";
-    }else if (poseTwo){
-      msg = "2";
-    }else if (poseOne){
-      msg = "1";
-    }else if (poseRock){
-      msg = "Rock On!"
-    }
-
-    const debouncedOnEvent = debounce(() => props.onEvent(msg, 2000));
-    debouncedOnEvent();
-  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
+  // /**
+  //  * Gesture Event
+  //  */
+  // useEffect(()=>{
+  //   let msg = '';
+  //   if (wavingCounter > 3){
+  //     msg = "Waving";
+  //   }else if (wavingCounter > 0){
+  //     msg = "";
+  //   }else if (poseThumbUp){
+  //     msg = "Thumbs Up!";
+  //   }else if (poseThumbDown){
+  //     msg = "Thumbs Down!";
+  //   }else if (poseFive){
+  //     msg = "5";
+  //   }else if (poseFour){
+  //     msg = "4";
+  //   }else if (poseThree){
+  //     msg = "3";
+  //   }else if (poseTwo){
+  //     msg = "2";
+  //   }else if (poseOne){
+  //     msg = "1";
+  //   }else if (poseRock){
+  //     msg = "Rock On!"
+  //   }
+  //
+  //   const debouncedOnEvent = debounce(() => props.onEvent(msg, 2000));
+  //   debouncedOnEvent();
+  // }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
   return (
     <div style={{display: "inline-block"}}>
       <div className="inline-block-sm">
         <strong>Hand Data</strong><br />
-        <div>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Waving: ${wavingCounter ? 'true' : 'false'}`}</div>
-        <div><small>{`(wave count: ${wavingCounter})`}</small></div>
+        <p>
+          <div>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
+          <div>{`Waving: ${wavingCounter ? 'true' : 'false'}`}</div>
+          <div><small>{`(wave count: ${wavingCounter})`}</small></div>
+        </p>
       </div>
 
       <div className="inline-block-sm">

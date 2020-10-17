@@ -3,6 +3,16 @@
   font-weight: 300;
 }
 
+button {
+  margin-top: 5px;
+  width: 100px;
+  height: 25px;
+}
+
+p {
+  margin-top: 5px;
+}
+
 canvas {
   left: 0;
   right: 0;
@@ -59,11 +69,4 @@ video {
   height: 100px;
   margin-top: 5px;
   padding: 10px;
-}
-
-#startStop {
-  margin-top: 5px;
-  width: 100px;
-  height: 25px;
-  color: white;
 }

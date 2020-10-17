@@ -16,6 +16,8 @@ window.prevTime = 0;
 window.fingers = ['thumb', 'indexFinger', 'middleFinger', 'ringFinger', 'pinky'];
 window.FINGER_LANDMARK_POINTS = 4;
 window.HAND_THRESHOLD = 0.96;
+
+window.stickyNotes = {action: null, saved: []};
 window.displayText = '';
 
 // const requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame ||
@@ -136,25 +138,38 @@ function App() {
       cltx.rect(bb_x, bb_y, bb_width, bb_height);
       cltx.stroke();
 
-      // draw display text
+      // draw new sticky note
       const posText = [...predictedPoints[9]];  // clone position array
-      if (window.displayText.trim()) {
-        vltx.translate(picWidth, 0); // flip horizontally
-        vltx.scale(-1, 1);
-        vltx.beginPath();
-        vltx.fillStyle = 'white';
-        vltx.fillRect(picWidth - posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
-        vltx.fillStyle = 'black';
-        vltx.rect(picWidth - posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
-        vltx.textAlign = 'center';
-        vltx.textBaseline = 'middle';
-        vltx.font = (bb_width / 12) + 'px Arial';
-        vltx.fillText(window.displayText.trim(), picWidth - posText[0], posText[1], bb_width/2 - 10);
-        vltx.stroke();
-        vltx.translate(picWidth, 0); // flip back
-        vltx.scale(-1, 1);
+      if (window.stickyNotes.action) {
+        var r_x = posText[0];
+        var r_y = posText[1];
+        var r_width = bb_width;
+        var r_height = bb_height;
+        var r_text = window.displayText.trim();
+        createStickyNote(r_x, r_y, r_width, r_height, r_text);
+        if (window.stickyNotes.action === "save") {
+          window.stickyNotes.saved.push({x: r_x, y: r_y, width: r_width, height: r_height, text: r_text});
+          window.stickyNotes.action = null;
+        }
       }
 
+    }
+
+    // TODO: multiline text, different colors, delete notes
+    function createStickyNote(x, y, width, height, text) {
+      vltx.translate(picWidth, 0); // flip horizontally
+      vltx.scale(-1, 1);
+      vltx.beginPath();
+      vltx.fillStyle = '#FFFF99';
+      vltx.fillRect(picWidth - x - width/4, y - height/6, width/2, height/3);
+      vltx.fillStyle = '#0B0B0B';
+      vltx.textAlign = 'center';
+      vltx.textBaseline = 'middle';
+      vltx.font = (width / 12) + 'px Helvetica';
+      vltx.fillText(text, picWidth - x, y, width/2 - 10);
+      vltx.stroke();
+      vltx.translate(picWidth, 0); // flip back
+      vltx.scale(-1, 1);
     }
 
     async function draw(tm) {
@@ -172,6 +187,11 @@ function App() {
       // Clear prediction layer
       vltx.clearRect(0, 0, picWidth, picHeight);
       cltx.clearRect(0, 0, picWidth, picHeight);
+
+      // Draw saved sticky notes first
+      for (const r of window.stickyNotes.saved) {
+        createStickyNote(r.x, r.y, r.width, r.height, r.text);
+      }
 
       // Hand prediction
       const predictions = await computeHandpose(canvas);
@@ -198,7 +218,18 @@ function App() {
   const handleStartStop = (e) => {
     setAnimationOn(!animationOn);
     setUiFPS(0);
+    window.stickyNotes.action = null;
+    window.stickyNotes.saved = [];
+    videoLayerRef.current.getContext('2d').clearRect(0, 0, picWidth, picHeight);
     console.log("animationOn: ", animationOn);
+  }
+
+  const handleStickyNotes = (e) => {
+    if (window.stickyNotes.action === null) {
+      window.stickyNotes.action = 'draw';
+    } else if (window.stickyNotes.action === 'draw') {
+      window.stickyNotes.action = 'save';
+    }
   }
 
   const onGestureEvent = (msg) => {
@@ -232,20 +263,26 @@ function App() {
 
       <div>
         <div className="inline-block-sm">
-          <strong>Demo Statistics</strong><br />
-          <div>Average FPS: {uiFPS}</div>
-          <button id="startStop" onClick={handleStartStop} enabled={videoReady.toString()} style={{backgroundColor: animationOn ? "red" : "green"}}>
-            {animationOn ? "Stop Demo" : "Start Demo"}
-          </button>
-          <div><small>{animationOn && uiFPS < 1 ? "loading cv view..." : ""}</small></div>
+          <strong>Demo Statistics</strong>
+          <p>
+            <div>Average FPS: {uiFPS}</div>
+            <button onClick={handleStartStop} enabled={videoReady.toString()} style={{backgroundColor: animationOn ? "red" : "green", color: "white"}}>
+              {animationOn ? "Stop Demo" : "Start Demo"}
+            </button>
+            <div><small>{animationOn && uiFPS < 1 ? "loading cv view..." : ""}</small></div>
+          </p>
         </div>
 
         <Gesture landmarks={landmarks} onEvent={onGestureEvent} />
 
         <div className="inline-block-sm">
-          <strong>Display Text</strong><br />
-          <input type="text" onChange={e => {window.displayText = e.target.value}}/>
-          <small>{window.displayText.trim() ? "hold hand up to display" : "enter text to enable"}</small>
+          <strong>AR Sticky Notes</strong>
+          <p>
+            <input type="text" placeholder="enter sticky note text" onChange={e => {window.displayText = e.target.value}}/>
+            <button onClick={handleStickyNotes} enabled={animationOn} style={{backgroundColor: "yellow"}}>
+              {window.stickyNotes.action ? "Place Note" : "Add Note"}
+            </button>
+          </p>
         </div>
 
       </div>
