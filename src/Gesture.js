@@ -12,6 +12,7 @@ import imgHandThumbsUp from './img/hand-thumbsup.png';
 import imgHandThumbsDown from './img/hand-thumbsdown.png';
 import imgHandNone from './img/hand-blank.png';
 import imgHandRock from './img/hand-rock.png';
+import imgHandWave from './img/hand-wave.gif';
 
 const angleThreshold = 12;
 
@@ -94,11 +95,11 @@ function Gesture(props) {
     if (prevSlideAngle) {
       if (currSlideAngle > prevSlideAngle + angleThreshold) {
         setSlideLeft(true);
-        setSlideRight(false); 
+        setSlideRight(false);
         // console.log("Slide left!");
       } else if (currSlideAngle < prevSlideAngle - angleThreshold) {
         setSlideLeft(false);
-        setSlideRight(true);   
+        setSlideRight(true);
         // console.log("Slide right!");
       }
     }
@@ -196,7 +197,7 @@ function Gesture(props) {
       setSlideLeft(false);
       setSlideRight(false);
     }
-    
+
   }, [props.landmarks]);
 
   /**
@@ -239,7 +240,9 @@ function Gesture(props) {
    */
   useEffect(()=>{
     let img = imgHandNone;
-    if (poseThumbUp) {
+    if (wavingCounter > 0) {
+      img = imgHandWave;
+    } else if (poseThumbUp) {
       img = imgHandThumbsUp;
     } else if (poseThumbDown) {
       img = imgHandThumbsDown;
@@ -258,7 +261,7 @@ function Gesture(props) {
     }
 
     setPredictedImage(img);
-  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, poseRock]);
+  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
   /**
    * Gesture Event
@@ -292,17 +295,16 @@ function Gesture(props) {
   }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
   return (
-    <div>
+    <div style={{display: "inline-block"}}>
       <div className="inline-block-sm">
-        <strong>Finger Data</strong><br />
+        <strong>Hand Data</strong><br />
         <div>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</div>
         <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
         <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
         <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
         <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
-        <div>{`Slide Left: ${slideLeft ? 'true' : 'false'}`}</div>
-        <div>{`Slide Right: ${slideRight ? 'true' : 'false'}`}</div>
-        <div>{`Waving Counter: ${wavingCounter}`}</div>
+        <div>{`Waving: ${wavingCounter ? 'true' : 'false'}`}</div>
+        <div><small>{`(wave count: ${wavingCounter})`}</small></div>
       </div>
 
       <div className="inline-block-sm">

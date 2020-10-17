@@ -4,12 +4,12 @@ function ParamSlider(props) {
 
   const updateParameter = (event) => {
     props.updateParam(event.target.id, event.target.value);
-    
+
   };
 
   return (
     <div>
-      <strong>Settings</strong><br />
+      <strong>Parameters</strong><br />
           <p>
             ThumbDist: {`${props.thumbDist}`} <input type="range" min="1" max="60" value={props.thumbDist} onChange={updateParameter} id="thumbDist" />
           </p>

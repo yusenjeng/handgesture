@@ -53,7 +53,7 @@ function App() {
       const devices = await navigator.mediaDevices.enumerateDevices();
       const deviceFacetime = devices.filter(device => /FaceTime/i.test(device.label));
       constraints.video.deviceId = deviceFacetime[0].deviceId;
-      
+
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       console.log("Get user media success!", stream);
 
@@ -138,18 +138,21 @@ function App() {
 
       // draw display text
       const posText = [...predictedPoints[9]];  // clone position array
-      posText[1] -= 30;
       if (window.displayText.trim()) {
+        vltx.translate(picWidth, 0); // flip horizontally
+        vltx.scale(-1, 1);
         vltx.beginPath();
         vltx.fillStyle = 'white';
-        vltx.fillRect(posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
+        vltx.fillRect(picWidth - posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
         vltx.fillStyle = 'black';
-        vltx.rect(posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
+        vltx.rect(picWidth - posText[0] - bb_width/4, posText[1] - bb_height/6, bb_width/2, bb_height/3);
         vltx.textAlign = 'center';
         vltx.textBaseline = 'middle';
         vltx.font = (bb_width / 12) + 'px Arial';
-        vltx.fillText(window.displayText.trim(), posText[0], posText[1], bb_width/2 - 10);
+        vltx.fillText(window.displayText.trim(), picWidth - posText[0], posText[1], bb_width/2 - 10);
         vltx.stroke();
+        vltx.translate(picWidth, 0); // flip back
+        vltx.scale(-1, 1);
       }
 
     }
@@ -187,13 +190,14 @@ function App() {
     if (animationOn && videoReady) {
       setRequestId(window.requestAnimationFrame(draw));
     } else {
-      ctx.clearRect(0, 0, picWidth, picHeight);
+      ctx.fillRect(0, 0, picWidth, picHeight);
       cancelAnimationFrame(requestId);
     }
   }, [animationOn, videoReady]);
 
   const handleStartStop = (e) => {
     setAnimationOn(!animationOn);
+    setUiFPS(0);
     console.log("animationOn: ", animationOn);
   }
 
@@ -223,14 +227,20 @@ function App() {
             <canvas ref={canvasLayerRef} style={{width: picWidth, height: picHeight}} />
           </div>
         </div>
-        
+
       </div>
 
       <div>
         <div className="inline-block-sm">
-          <strong>Statistics</strong><br />
-          <span>Average FPS: {uiFPS}</span>
+          <strong>Demo Statistics</strong><br />
+          <div>Average FPS: {uiFPS}</div>
+          <button id="startStop" onClick={handleStartStop} enabled={videoReady.toString()} style={{backgroundColor: animationOn ? "red" : "green"}}>
+            {animationOn ? "Stop Demo" : "Start Demo"}
+          </button>
+          <div><small>{animationOn && uiFPS < 1 ? "loading cv view..." : ""}</small></div>
         </div>
+
+        <Gesture landmarks={landmarks} onEvent={onGestureEvent} />
 
         <div className="inline-block-sm">
           <strong>Display Text</strong><br />
@@ -238,13 +248,6 @@ function App() {
           <small>{window.displayText.trim() ? "hold hand up to display" : "enter text to enable"}</small>
         </div>
 
-        <div className="inline-block-sm">
-          <button id="startStop" onClick={handleStartStop} enabled={videoReady.toString()}>
-            {animationOn ? "Stop Animation" : "Start Animation"}
-          </button>
-        </div>
-
-        <Gesture landmarks={landmarks} onEvent={onGestureEvent} />
       </div>
 
     </div>
