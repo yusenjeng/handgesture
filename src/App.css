@@ -7,10 +7,16 @@ button {
   margin-top: 5px;
   width: 100px;
   height: 25px;
+  border-radius: 5px;
+  display: block;
 }
 
 p {
-  margin-top: 5px;
+  margin-top: 6px;
+}
+
+textarea {
+  height: 50px;
 }
 
 canvas {
@@ -34,6 +40,7 @@ video {
   background-color: #049Fd9;
   color: white;
   padding: 1px;
+  margin-bottom: 10px;
 }
 
 .canvas-container {

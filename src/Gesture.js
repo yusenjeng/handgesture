@@ -305,13 +305,13 @@ function Gesture(props) {
       <div className="inline-block-sm">
         <strong>Hand Data</strong><br />
         <p>
-          <div>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</div>
-          <div>{`Index: ${firstOpen ? 'open' : 'closed'}`}</div>
-          <div>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</div>
-          <div>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</div>
-          <div>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</div>
-          <div>{`Waving: ${wavingCounter ? 'true' : 'false'}`}</div>
-          <div><small>{`(wave count: ${wavingCounter})`}</small></div>
+          <span>{`Thumb: ${poseThumbUp ? 'open & up' : poseThumbDown ? 'open & down' : thumbOpen ? 'open' : 'closed'}`}</span><br />
+          <span>{`Index: ${firstOpen ? 'open' : 'closed'}`}</span><br />
+          <span>{`Middle: ${secondOpen ? 'open' : 'closed'}`}</span><br />
+          <span>{`Ring: ${thirdOpen ? 'open' : 'closed'}`}</span><br />
+          <span>{`Pinky: ${fourthOpen ? 'open' : 'closed'}`}</span><br />
+          <span>{`Waving: ${wavingCounter ? 'true' : 'false'}`}</span><br />
+          <span><small>{`(wave count: ${wavingCounter})`}</small></span><br />
         </p>
       </div>
 

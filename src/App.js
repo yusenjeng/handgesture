@@ -155,7 +155,6 @@ function App() {
 
     }
 
-    // TODO: multiline text, different colors, delete notes
     function createStickyNote(x, y, width, height, text) {
       vltx.translate(picWidth, 0); // flip horizontally
       vltx.scale(-1, 1);
@@ -165,8 +164,12 @@ function App() {
       vltx.fillStyle = '#0B0B0B';
       vltx.textAlign = 'center';
       vltx.textBaseline = 'middle';
-      vltx.font = (width / 12) + 'px Helvetica';
-      vltx.fillText(text, picWidth - x, y, width/2 - 10);
+      var lines = text.split('\n');
+      var fontSize = Math.min(width/18, (height/3) / lines.length);
+      vltx.font = fontSize + 'px Helvetica';
+      for (var i = 0; i < lines.length; i++) {
+        vltx.fillText(lines[i], picWidth - x, y + (i * fontSize) - ((lines.length-1) * fontSize/2), width/2 - 10);
+      }
       vltx.stroke();
       vltx.translate(picWidth, 0); // flip back
       vltx.scale(-1, 1);
@@ -218,9 +221,9 @@ function App() {
   const handleStartStop = (e) => {
     setAnimationOn(!animationOn);
     setUiFPS(0);
-    window.stickyNotes.action = null;
-    window.stickyNotes.saved = [];
+    handleDeleteNotes();
     videoLayerRef.current.getContext('2d').clearRect(0, 0, picWidth, picHeight);
+    canvasLayerRef.current.getContext('2d').clearRect(0, 0, picWidth, picHeight);
     console.log("animationOn: ", animationOn);
   }
 
@@ -230,6 +233,11 @@ function App() {
     } else if (window.stickyNotes.action === 'draw') {
       window.stickyNotes.action = 'save';
     }
+  }
+
+  const handleDeleteNotes = (e) => {
+    window.stickyNotes.action = null;
+    window.stickyNotes.saved = [];
   }
 
   const onGestureEvent = (msg) => {
@@ -265,11 +273,11 @@ function App() {
         <div className="inline-block-sm">
           <strong>Demo Statistics</strong>
           <p>
-            <div>Average FPS: {uiFPS}</div>
+            <span>Average FPS: {uiFPS}</span><br />
             <button onClick={handleStartStop} enabled={videoReady.toString()} style={{backgroundColor: animationOn ? "red" : "green", color: "white"}}>
               {animationOn ? "Stop Demo" : "Start Demo"}
             </button>
-            <div><small>{animationOn && uiFPS < 1 ? "loading cv view..." : ""}</small></div>
+            <span><small>{animationOn && uiFPS < 1 ? "loading cv view..." : ""}</small></span>
           </p>
         </div>
 
@@ -278,9 +286,12 @@ function App() {
         <div className="inline-block-sm">
           <strong>AR Sticky Notes</strong>
           <p>
-            <input type="text" placeholder="enter sticky note text" onChange={e => {window.displayText = e.target.value}}/>
-            <button onClick={handleStickyNotes} enabled={animationOn} style={{backgroundColor: "yellow"}}>
-              {window.stickyNotes.action ? "Place Note" : "Add Note"}
+            <textarea placeholder="Enter text..." onChange={e => {window.displayText = e.target.value}}></textarea>
+            <button onClick={handleStickyNotes} enabled={animationOn.toString()} style={{backgroundColor: "yellow"}}>
+              {window.stickyNotes.action ? "Post Note" : "Add Note"}
+            </button>
+            <button onClick={handleDeleteNotes} enabled={animationOn.toString()} style={{backgroundColor: "lightgray"}}>
+              Delete Notes
             </button>
           </p>
         </div>
