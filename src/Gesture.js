@@ -8,6 +8,7 @@ import imgHandTwo from './img/hand-two.png';
 import imgHandThree from './img/hand-three.png';
 import imgHandFour from './img/hand-four.png';
 import imgHandFive from './img/hand-five.png';
+import imgHandSix from './img/hand-six.png';
 import imgHandThumbsUp from './img/hand-thumbsup.png';
 import imgHandThumbsDown from './img/hand-thumbsdown.png';
 import imgHandNone from './img/hand-blank.png';
@@ -39,6 +40,7 @@ function Gesture(props) {
   const [poseThree, setPoseThree] = useState(false);
   const [poseFour, setPoseFour] = useState(false);
   const [poseFive, setPoseFive] = useState(false);
+  const [poseSix, setPoseSix] = useState(false);
   const [poseRock, setPoseRock] = useState(false);
 
   const [predictedImage, setPredictedImage] = useState(null);
@@ -211,6 +213,7 @@ function Gesture(props) {
     setPoseThree(!thumbOpen && firstOpen && secondOpen && thirdOpen && !fourthOpen);
     setPoseFour(!thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen);
     setPoseFive(thumbOpen && firstOpen && secondOpen && thirdOpen && fourthOpen);
+    setPoseSix(thumbOpen && !firstOpen && !secondOpen && !thirdOpen && fourthOpen);
     setPoseRock(thumbOpen && firstOpen && !secondOpen && !thirdOpen && fourthOpen);
   }, [thumbUp, thumbDown, thumbOpen, firstOpen, secondOpen, thirdOpen, fourthOpen]);
 
@@ -246,6 +249,8 @@ function Gesture(props) {
       img = imgHandThumbsUp;
     } else if (poseThumbDown) {
       img = imgHandThumbsDown;
+    } else if (poseSix) {
+      img = imgHandSix;
     } else if (poseFive) {
       img = imgHandFive;
     } else if (poseFour) {
@@ -261,7 +266,8 @@ function Gesture(props) {
     }
 
     setPredictedImage(img);
-  }, [poseThumbUp, poseThumbDown, poseFive, poseFour, poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
+  }, [poseThumbUp, poseThumbDown, poseSix, poseFive, poseFour, 
+      poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
   // /**
   //  * Gesture Event
