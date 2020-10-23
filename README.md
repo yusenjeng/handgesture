@@ -21,6 +21,14 @@ Specifically, we need the packages for handpose DL model:
 
 ```yarn start``` to run the app, then open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
+You will be able to see the demo page like this:
+
+![Image of Demo Page](https://github.com/yusenjeng/handgesture/blob/master/src/img/DemoPage.png)
+
+Click the ```Start Demo``` button to load the model and see how your hand gesture is recognized.
+
+You could also tune the parameters for your thumb, or add texts for the sticky notes.
+
 ## Integration to Webex Meeting Web App
 
 The integration is not open-sourced. If you are interested, please contact us through Github :stuck_out_tongue_closed_eyes:
