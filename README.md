@@ -10,9 +10,7 @@ Based on a tuned deep learning [model](https://github.com/tensorflow/tfjs-models
 
 ## Run locally
 
-### `yarn install`
-
-to install the required packages.
+```yarn install``` to install the required packages.
 
 Specifically, we need the packages for handpose DL model:
 ```
@@ -21,9 +19,7 @@ Specifically, we need the packages for handpose DL model:
 @tensorflow/tfjs-backend-webgl # or @tensorflow/tfjs-backend-wasm
 ```
 
-### `yarn start`
-
-to run the app, then open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```yarn start``` to run the app, then open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Integration to Webex Meeting Web App
 
