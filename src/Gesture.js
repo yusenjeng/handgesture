@@ -243,7 +243,7 @@ function Gesture(props) {
    */
   useEffect(()=>{
     let img = imgHandNone;
-    if (wavingCounter > 0) {
+    if (wavingCounter > 3) {
       img = imgHandWave;
     } else if (poseThumbUp) {
       img = imgHandThumbsUp;
@@ -266,7 +266,7 @@ function Gesture(props) {
     }
 
     setPredictedImage(img);
-  }, [poseThumbUp, poseThumbDown, poseSix, poseFive, poseFour, 
+  }, [poseThumbUp, poseThumbDown, poseSix, poseFive, poseFour,
       poseThree, poseTwo, poseOne, wavingCounter, poseRock]);
 
   // /**

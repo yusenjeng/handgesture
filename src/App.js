@@ -248,7 +248,7 @@ function App() {
     <div className="app">
 
       <div className="app-header">
-        <h1><img className="cisco-logo" src={imgCiscoLogo} />Webex GestureUI Demo</h1>
+        <h1><img className="cisco-logo" src={imgCiscoLogo} />Webex GestureUI Prototype</h1>
       </div>
 
       <div>
